@@ -1,47 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-  <header>
-  
-  <div class="logo">PERFORMR</div>
-      <a href="#profile">Profile </a>
-</header>
-
-<div class="contents">
-  <nav aria-label="Tab Navigation">
-    <ul>
-      <li><a href="explore.html" class="active">Explore</a></li>
-      <li><a href="applied.html">Applied</a></li>
-      <li><a href="listings.html">My Listings</a></li>
-    </ul>
-  </nav>
-</div>
-
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Find a Role</title>
+<title>Explore – Performr</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+
+<header>
+  <a href="#profile" class="profile-link">Profile</a>
+  <div class="right">
+    <span class="logo">performr</span>
+    <div class="logo-dot"></div>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <a href="explore.html" class="tab-explore tab-active-explore">Explore</a>
+  <a href="applied.html" class="tab-applied">Applied</a>
+  <a href="listings.html" class="tab-listings">My Listings</a>
+</div>
+
 <div id="app">
 
   <!-- Sidebar -->
   <div id="sidebar">
+
     <div id="sidebar-top">
       <div id="search-row">
         <input id="search" type="text" placeholder="Search by name or city…" aria-label="Search roles" />
         <button id="filter-btn" aria-expanded="false" aria-controls="filter-panel">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
           Filters
           <span class="dot"></span>
         </button>
       </div>
     </div>
 
-    <!-- Filter panel — chips use data-filter matching the JS filters keys -->
+    <!-- Filter panel -->
     <div id="filter-panel" role="region" aria-label="Filters">
       <div class="filter-group">
         <label>Genre</label>
@@ -82,10 +81,6 @@
       </div>
     </div>
 
-    <div id="hint-bar">
-      <span id="role-count">0</span>&nbsp;roles shown · Right-click map to add a pin
-    </div>
-
     <div id="cards" role="list" aria-label="Role list"></div>
     <div id="empty-state" aria-live="polite">
       <p>📍</p>
@@ -98,13 +93,11 @@
     <div id="map" aria-label="Role locations map"></div>
     <div id="rc-hint" role="status">📍 Pin added! Click it to see details.</div>
   </div>
+
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-/* ── Filter definitions — single source of truth ── */
-// Each key matches data-filter on chips AND a field on every role object.
-// allValues lets clear-filters and updateFilterBtnState work generically.
 const FILTER_DEFS = {
   genre:    ["dance", "instrumental", "theatre"],
   level:    ["no experience", "beginner", "novice", "intermediate", "pro"],
@@ -115,20 +108,17 @@ const FILTER_DEFS = {
 const filters = {};
 Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); });
 
-/* ── Data ── */
-// Each role must have a value for every filter key so filtered() can test it.
 const roles = [
-  { id: 1, name: "Tap Ensemble",        addr: "4205 Rue Jean-Talon Ouest", city: "Montréal, QC",  genre: "dance",        level: "intermediate", location: "indoors",  uniform: "uniform required",  lat: 45.4960, lng: -73.6350 },
-  { id: 2, name: "Jazz Quartet",         addr: "3035 Boul. Le Carrefour",   city: "Laval, QC",     genre: "instrumental", level: "pro",          location: "venue",    uniform: "no uniform",        lat: 45.5580, lng: -73.7350 },
-  { id: 3, name: "Youth Theatre Troupe", addr: "1000 Rue Ste-Catherine",    city: "Longueuil, QC", genre: "theatre",      level: "beginner",     location: "indoors",  uniform: "uniform provided",  lat: 45.5350, lng: -73.5120 },
-  { id: 4, name: "Street Dance Crew",    addr: "3232 Boul. St-Charles",     city: "Kirkland, QC",  genre: "dance",        level: "novice",       location: "outdoors", uniform: "no uniform",        lat: 45.4490, lng: -73.8700 },
-  { id: 5, name: "Community Orchestra",  addr: "900 Boul. des Laurentides",  city: "St-Jérôme, QC", genre: "instrumental", level: "no experience",location: "venue",    uniform: "uniform provided",  lat: 45.7750, lng: -74.0020 },
+  { id: 1, name: "Tap Ensemble",        addr: "4205 Rue Jean-Talon Ouest", city: "Montréal, QC",  genre: "dance",        level: "intermediate",  location: "indoors",  uniform: "uniform required",  lat: 45.4960, lng: -73.6350 },
+  { id: 2, name: "Jazz Quartet",         addr: "3035 Boul. Le Carrefour",   city: "Laval, QC",     genre: "instrumental", level: "pro",           location: "venue",    uniform: "no uniform",        lat: 45.5580, lng: -73.7350 },
+  { id: 3, name: "Youth Theatre Troupe", addr: "1000 Rue Ste-Catherine",    city: "Longueuil, QC", genre: "theatre",      level: "beginner",      location: "indoors",  uniform: "uniform provided",  lat: 45.5350, lng: -73.5120 },
+  { id: 4, name: "Street Dance Crew",    addr: "3232 Boul. St-Charles",     city: "Kirkland, QC",  genre: "dance",        level: "novice",        location: "outdoors", uniform: "no uniform",        lat: 45.4490, lng: -73.8700 },
+  { id: 5, name: "Community Orchestra",  addr: "900 Boul. des Laurentides",  city: "St-Jérôme, QC", genre: "instrumental", level: "no experience", location: "venue",    uniform: "uniform provided",  lat: 45.7750, lng: -74.0020 },
 ];
 let nextId = 6;
 let activeId = null;
 let searchVal = "";
 
-/* ── Map ── */
 const map = L.map('map');
 map.zoomControl.remove();
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -151,7 +141,6 @@ navigator.geolocation.getCurrentPosition(
   { enableHighAccuracy: true, timeout: 10000 }
 );
 
-/* ── Icon: plain round dot, no number ── */
 function makeIcon(color) {
   return L.divIcon({
     className: '',
@@ -164,7 +153,6 @@ function makeIcon(color) {
   });
 }
 
-/* ── Markers registry ── */
 const markerMap = {};
 
 function addRoleMarker(role) {
@@ -185,21 +173,15 @@ function popupHtml(r) {
   `;
 }
 
-/* ── Right-click: place custom pin ── */
 map.on('contextmenu', (e) => {
   const { lat, lng } = e.latlng;
   const id = nextId++;
-  // Custom pins get the first value of each filter category so they always pass filtering
   const role = {
-    id,
-    name: `Custom pin #${id - 5}`,
-    addr: '',
+    id, name: `Custom pin #${id - 5}`, addr: '',
     city: `${lat.toFixed(4)}° N, ${Math.abs(lng).toFixed(4)}° W`,
     type: 'custom',
-    genre: FILTER_DEFS.genre[0],
-    level: FILTER_DEFS.level[0],
-    location: FILTER_DEFS.location[0],
-    uniform: FILTER_DEFS.uniform[0],
+    genre: FILTER_DEFS.genre[0], level: FILTER_DEFS.level[0],
+    location: FILTER_DEFS.location[0], uniform: FILTER_DEFS.uniform[0],
     lat, lng,
   };
   roles.push(role);
@@ -215,21 +197,17 @@ function showHint() {
   setTimeout(() => h.classList.remove('show'), 2800);
 }
 
-/* ── Filtering & search ── */
 function filtered() {
   return roles.filter(role => {
-    // Check every active filter key against the role's matching field
     for (const key of Object.keys(FILTER_DEFS)) {
       if (!filters[key].has(role[key])) return false;
     }
-    // Search
     const q = searchVal.toLowerCase();
     if (q && !role.name.toLowerCase().includes(q) && !role.city.toLowerCase().includes(q)) return false;
     return true;
   });
 }
 
-/* ── Render ── */
 function render() {
   const list = filtered();
 
@@ -276,7 +254,6 @@ function render() {
     cardsEl.appendChild(div);
   });
 
-  document.getElementById('role-count').textContent = list.length;
   updateFilterBtnState();
 }
 
@@ -298,7 +275,6 @@ function removeRole(id) {
   render();
 }
 
-/* ── Filters UI ── */
 const filterBtn = document.getElementById('filter-btn');
 const filterPanel = document.getElementById('filter-panel');
 
@@ -313,7 +289,7 @@ document.querySelectorAll('.chip').forEach(chip => {
     const f = chip.dataset.filter;
     const v = chip.dataset.val;
     if (filters[f].has(v)) {
-      if (filters[f].size === 1) return; // keep at least one active per group
+      if (filters[f].size === 1) return;
       filters[f].delete(v);
       chip.classList.remove('on');
     } else {
@@ -325,13 +301,11 @@ document.querySelectorAll('.chip').forEach(chip => {
 });
 
 document.getElementById('clear-filters').addEventListener('click', () => {
-  // Reset every filter group to all values using FILTER_DEFS
   Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); });
   document.querySelectorAll('.chip').forEach(c => c.classList.add('on'));
   render();
 });
 
-// Generically checks whether every filter group is fully selected
 function updateFilterBtnState() {
   const allSelected = Object.keys(FILTER_DEFS).every(
     k => filters[k].size === FILTER_DEFS[k].length
@@ -339,13 +313,11 @@ function updateFilterBtnState() {
   filterBtn.classList.toggle('has-filters', !allSelected);
 }
 
-/* ── Search ── */
 document.getElementById('search').addEventListener('input', (e) => {
   searchVal = e.target.value;
   render();
 });
 
-/* ── Init ── */
 render();
 </script>
 </body>
