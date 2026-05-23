@@ -1,0 +1,53 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<title>Sign Up</title>
+<h1>Create Account</h1>
+<form id="signup-form">
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="text" id="nickname" placeholder="Username" required />
+  <input type="password" id="password" placeholder="Password" required />
+  <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+  <button type="submit">Sign Up</button>
+</form>
+<p>Already have an account? <a href="login.html">Login</a></p>
+
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+<script>
+  (async () => {
+    const client = await auth0.createAuth0Client({
+      domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+      clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+      authorizationParams: { redirect_uri: location.origin },
+    });
+
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const nickname = document.getElementById('nickname').value;
+
+        if (password !== confirmPassword) {
+          alert('Passwords do not match');
+          return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, nickname })
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+            alert('Signup successful! Please log in.');
+            window.location.href = 'login.html';
+            } else {
+            alert('Signup failed: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+  })();
+</script>

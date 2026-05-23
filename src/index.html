@@ -8,14 +8,15 @@
 
 <div id="view-authenticated" hidden>
   <p>Logged in as <span id="user-email"></span></p>
+  <p>Username: <span id="user-name"></span></p>
   <h1>User Profile</h1>
   <pre id="user-profile"></pre>
   <button onclick="client.logout({logoutParams:{returnTo:location.origin}})">Logout</button>
 </div>
 
 <div id="view-unauthenticated" hidden>
-  <button onclick="client.loginWithRedirect({authorizationParams:{screen_hint:'signup'}})">Signup</button>
-  <button onclick="client.loginWithRedirect()">Login</button>
+  <button onclick="location.href = 'signup.html'">Signup</button>
+  <button onclick="location.href = 'login.html'">Login</button>
 </div>
 
 <!-- Install the Auth0 SPA SDK -->
@@ -52,6 +53,7 @@
     if (await window.client.isAuthenticated()) {
       const user = await window.client.getUser();
       setTextContent("user-email", user.email);
+      setTextContent("user-name", user.nickname);
       setTextContent("user-profile", JSON.stringify(user, null, 2));
       displayView("authenticated");
       return;
