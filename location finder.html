@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Find a Role</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --brand:        #ED6E1C;
+    --brand-dark:   #C4530E;
+    --brand-light:  #FDF0E8;
+    --surface:      #FFFFFF;
+    --surface-alt:  #F7F5F2;
+    --border:       #E8E4DE;
+    --text:         #1A1714;
+    --text-muted:   #8A8178;
+    --text-faint:   #B5AFA8;
+    --success:      #2D7A4F;
+    --danger:       #B83232;
+    --radius:       10px;
+    --sidebar-w:    320px;
+    --font:         'DM Sans', sans-serif;
+    --font-mono:    'DM Mono', monospace;
+  }
+
+  html, body { height: 100%; overflow: hidden; font-family: var(--font); color: var(--text); background: var(--surface-alt); }
+
+  #app { display: flex; height: 100vh; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    z-index: 10;
+  }
+
+  #sidebar-top {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #sidebar-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #sidebar-title svg { color: var(--brand); }
+
+  #search-row { display: flex; gap: 8px; }
+
+  #search {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: var(--font);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-alt);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  #search::placeholder { color: var(--text-faint); }
+  #search:focus { border-color: var(--brand); }
+
+  #filter-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: var(--font);
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.12s, border-color 0.12s;
+    white-space: nowrap;
+  }
+  #filter-btn:hover { background: var(--surface-alt); border-color: var(--text-faint); }
+  #filter-btn.active { background: var(--brand-light); border-color: var(--brand); color: var(--brand-dark); }
+  #filter-btn .dot {
+    display: none;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--brand);
+  }
+  #filter-btn.has-filters .dot { display: inline-block; }
+
+  /* ── Filter panel ── */
+  #filter-panel {
+    display: none;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--brand-light);
+    gap: 12px;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 260px;
+  }
+  #filter-panel.open { display: flex; }
+
+  .filter-group label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .chip {
+    padding: 5px 11px;
+    font-size: 12px;
+    font-family: var(--font);
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .chip:hover { border-color: var(--brand); color: var(--brand-dark); }
+  .chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+  .filter-actions { display: flex; justify-content: flex-end; }
+  .clear-filters {
+    font-size: 12px;
+    font-family: var(--font);
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .clear-filters:hover { color: var(--danger); }
+
+  /* ── Hint bar ── */
+  #hint-bar {
+    padding: 8px 16px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #role-count { font-weight: 600; color: var(--text); }
+
+  /* ── Cards list ── */
+  #cards { flex: 1; overflow-y: auto; }
+  #cards::-webkit-scrollbar { width: 4px; }
+  #cards::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .card {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+    position: relative;
+  }
+  .card:hover { background: var(--surface-alt); }
+  .card.active { background: var(--brand-light); }
+  .card.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--brand);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .card-row1 { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 5px; }
+
+  /* Dot replacing numbered badge */
+  .pin-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--brand);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .card.active .pin-dot { background: var(--brand-dark); }
+
+  .card-name { font-size: 14px; font-weight: 600; flex: 1; letter-spacing: -0.2px; }
+  .card-type-tag {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .card-addr { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; padding-left: 22px; }
+
+  .card-footer { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-left: 22px; }
+
+  .tag-pill {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  .card-remove {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 22px; height: 22px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-faint);
+    font-size: 16px;
+    line-height: 1;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+    opacity: 0;
+  }
+  .card:hover .card-remove { opacity: 1; }
+  .card-remove:hover { background: #FAEAEA; color: var(--danger); }
+
+  #empty-state {
+    display: none;
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+  #empty-state p:first-child { font-size: 28px; margin-bottom: 8px; }
+
+  /* ── Map ── */
+  #map-wrap { flex: 1; position: relative; }
+  #map { height: 100%; width: 100%; }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: var(--radius) !important;
+    font-family: var(--font) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+    border: 1px solid var(--border) !important;
+  }
+  .leaflet-popup-content { font-size: 13px !important; line-height: 1.6 !important; margin: 10px 14px !important; }
+  .leaflet-popup-content strong { font-size: 14px; font-weight: 600; }
+  .leaflet-popup-content small { color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; }
+  .leaflet-popup-tip { display: none !important; }
+
+  #rc-hint {
+    position: absolute;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26,23,20,0.82);
+    color: #fff;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  #rc-hint.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div id="sidebar-top">
+      <div id="sidebar-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s-8-5.25-8-12a8 8 0 0 1 16 0c0 6.75-8 12-8 12z"/><circle cx="12" cy="10" r="3"/></svg>
+        Find a Role
+      </div>
+      <div id="search-row">
+        <input id="search" type="text" placeholder="Search by name or city…" aria-label="Search roles" />
+        <button id="filter-btn" aria-expanded="false" aria-controls="filter-panel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          Filters
+          <span class="dot"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter panel — chips use data-filter matching the JS filters keys -->
+    <div id="filter-panel" role="region" aria-label="Filters">
+      <div class="filter-group">
+        <label>Genre</label>
+        <div class="filter-chips">
+          <button class="chip on" data-filter="genre" data-val="dance">Dance</button>
+          <button class="chip on" data-filter="genre" data-val="instrumental">Instrumental</button>
+          <button class="chip on" data-filter="genre" data-val="theatre">Theatre</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Level</label>
+        <div class="filter-chips">
+          <button class="chip on" data-filter="level" data-val="no experience">No experience</button>
+          <button class="chip on" data-filter="level" data-val="beginner">Beginner</button>
+          <button class="chip on" data-filter="level" data-val="novice">Novice</button>
+          <button class="chip on" data-filter="level" data-val="intermediate">Intermediate</button>
+          <button class="chip on" data-filter="level" data-val="pro">Pro</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Location</label>
+        <div class="filter-chips">
+          <button class="chip on" data-filter="location" data-val="indoors">Indoors</button>
+          <button class="chip on" data-filter="location" data-val="outdoors">Outdoors</button>
+          <button class="chip on" data-filter="location" data-val="venue">Venue</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Uniform</label>
+        <div class="filter-chips">
+          <button class="chip on" data-filter="uniform" data-val="no uniform">No uniform</button>
+          <button class="chip on" data-filter="uniform" data-val="uniform provided">Uniform provided</button>
+          <button class="chip on" data-filter="uniform" data-val="uniform required">Uniform required</button>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="clear-filters" id="clear-filters">Clear all filters</button>
+      </div>
+    </div>
+
+    <div id="hint-bar">
+      <span id="role-count">0</span>&nbsp;roles shown · Right-click map to add a pin
+    </div>
+
+    <div id="cards" role="list" aria-label="Role list"></div>
+    <div id="empty-state" aria-live="polite">
+      <p>📍</p>
+      <p>No roles match your filters.</p>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div id="map-wrap">
+    <div id="map" aria-label="Role locations map"></div>
+    <div id="rc-hint" role="status">📍 Pin added! Click it to see details.</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+/* ── Filter definitions — single source of truth ── */
+// Each key matches data-filter on chips AND a field on every role object.
+// allValues lets clear-filters and updateFilterBtnState work generically.
+const FILTER_DEFS = {
+  genre:    ["dance", "instrumental", "theatre"],
+  level:    ["no experience", "beginner", "novice", "intermediate", "pro"],
+  location: ["indoors", "outdoors", "venue"],
+  uniform:  ["no uniform", "uniform provided", "uniform required"],
+};
+
+const filters = {};
+Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); });
+
+/* ── Data ── */
+// Each role must have a value for every filter key so filtered() can test it.
+const roles = [
+  { id: 1, name: "Tap Ensemble",        addr: "4205 Rue Jean-Talon Ouest", city: "Montréal, QC",  genre: "dance",        level: "intermediate", location: "indoors",  uniform: "uniform required",  lat: 45.4960, lng: -73.6350 },
+  { id: 2, name: "Jazz Quartet",         addr: "3035 Boul. Le Carrefour",   city: "Laval, QC",     genre: "instrumental", level: "pro",          location: "venue",    uniform: "no uniform",        lat: 45.5580, lng: -73.7350 },
+  { id: 3, name: "Youth Theatre Troupe", addr: "1000 Rue Ste-Catherine",    city: "Longueuil, QC", genre: "theatre",      level: "beginner",     location: "indoors",  uniform: "uniform provided",  lat: 45.5350, lng: -73.5120 },
+  { id: 4, name: "Street Dance Crew",    addr: "3232 Boul. St-Charles",     city: "Kirkland, QC",  genre: "dance",        level: "novice",       location: "outdoors", uniform: "no uniform",        lat: 45.4490, lng: -73.8700 },
+  { id: 5, name: "Community Orchestra",  addr: "900 Boul. des Laurentides",  city: "St-Jérôme, QC", genre: "instrumental", level: "no experience",location: "venue",    uniform: "uniform provided",  lat: 45.7750, lng: -74.0020 },
+];
+let nextId = 6;
+let activeId = null;
+let searchVal = "";
+
+/* ── Map ── */
+const map = L.map('map');
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+map.setView([45.530, -73.620], 11);
+
+navigator.geolocation.getCurrentPosition(
+  ({ coords }) => {
+    const { latitude, longitude, accuracy } = coords;
+    map.setView([latitude, longitude], 13);
+    L.marker([latitude, longitude])
+      .addTo(map)
+      .bindPopup(`<strong>You are here</strong><br><small>±${Math.round(accuracy)} m accuracy</small>`)
+      .openPopup();
+    L.circle([latitude, longitude], { radius: accuracy, color: '#ED6E1C', fillColor: '#ED6E1C', fillOpacity: 0.08, weight: 1 }).addTo(map);
+  },
+  () => {},
+  { enableHighAccuracy: true, timeout: 10000 }
+);
+
+/* ── Icon: plain round dot, no number ── */
+function makeIcon(color) {
+  return L.divIcon({
+    className: '',
+    html: `<svg width="15" height="15" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="7.5" cy="7.5" r="6.5" fill="${color}" stroke="white" stroke-width="1.5"/>
+    </svg>`,
+    iconSize: [15, 15],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -10]
+  });
+}
+
+/* ── Markers registry ── */
+const markerMap = {};
+
+function addRoleMarker(role) {
+  const color = role.type === 'custom' ? '#8B5CF6' : '#ED6E1C';
+  const m = L.marker([role.lat, role.lng], { icon: makeIcon(color) }).addTo(map);
+  m.bindPopup(popupHtml(role));
+  m.on('click', () => selectRole(role.id));
+  markerMap[role.id] = m;
+}
+
+function popupHtml(r) {
+  const isCustom = r.type === 'custom';
+  return `
+    <strong>${r.name}</strong><br>
+    ${r.addr ? r.addr + '<br>' : ''}
+    <small>${r.city}</small>
+    ${!isCustom ? `<br><small>${r.genre} · ${r.level} · ${r.location}</small>` : ''}
+  `;
+}
+
+/* ── Right-click: place custom pin ── */
+map.on('contextmenu', (e) => {
+  const { lat, lng } = e.latlng;
+  const id = nextId++;
+  // Custom pins get the first value of each filter category so they always pass filtering
+  const role = {
+    id,
+    name: `Custom pin #${id - 5}`,
+    addr: '',
+    city: `${lat.toFixed(4)}° N, ${Math.abs(lng).toFixed(4)}° W`,
+    type: 'custom',
+    genre: FILTER_DEFS.genre[0],
+    level: FILTER_DEFS.level[0],
+    location: FILTER_DEFS.location[0],
+    uniform: FILTER_DEFS.uniform[0],
+    lat, lng,
+  };
+  roles.push(role);
+  addRoleMarker(role);
+  showHint();
+  render();
+  selectRole(id);
+});
+
+function showHint() {
+  const h = document.getElementById('rc-hint');
+  h.classList.add('show');
+  setTimeout(() => h.classList.remove('show'), 2800);
+}
+
+/* ── Filtering & search ── */
+function filtered() {
+  return roles.filter(role => {
+    // Check every active filter key against the role's matching field
+    for (const key of Object.keys(FILTER_DEFS)) {
+      if (!filters[key].has(role[key])) return false;
+    }
+    // Search
+    const q = searchVal.toLowerCase();
+    if (q && !role.name.toLowerCase().includes(q) && !role.city.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+/* ── Render ── */
+function render() {
+  const list = filtered();
+
+  Object.values(markerMap).forEach(m => map.removeLayer(m));
+  Object.keys(markerMap).forEach(k => delete markerMap[k]);
+  list.forEach(role => addRoleMarker(role));
+  if (activeId && markerMap[activeId]) markerMap[activeId].openPopup();
+
+  const cardsEl = document.getElementById('cards');
+  const emptyEl = document.getElementById('empty-state');
+  cardsEl.innerHTML = '';
+  emptyEl.style.display = list.length === 0 ? 'block' : 'none';
+
+  list.forEach(role => {
+    const div = document.createElement('div');
+    div.className = 'card' + (role.id === activeId ? ' active' : '');
+    div.setAttribute('role', 'listitem');
+    const isCustom = role.type === 'custom';
+    div.innerHTML = `
+      <div class="card-row1">
+        <div class="pin-dot"></div>
+        <div class="card-name">${role.name}</div>
+        ${isCustom ? '<span class="card-type-tag">custom</span>' : ''}
+      </div>
+      <div class="card-addr">${role.addr ? role.addr + ', ' : ''}${role.city}</div>
+      <div class="card-footer">
+        ${!isCustom ? `
+          <span class="tag-pill">${role.genre}</span>
+          <span class="tag-pill">${role.level}</span>
+          <span class="tag-pill">${role.location}</span>
+          <span class="tag-pill">${role.uniform}</span>
+        ` : ''}
+      </div>
+      <button class="card-remove" data-id="${role.id}" aria-label="Remove ${role.name}" title="Remove">×</button>
+    `;
+    div.addEventListener('click', (e) => {
+      if (e.target.closest('.card-remove')) return;
+      selectRole(role.id);
+    });
+    div.querySelector('.card-remove').addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeRole(role.id);
+    });
+    cardsEl.appendChild(div);
+  });
+
+  document.getElementById('role-count').textContent = list.length;
+  updateFilterBtnState();
+}
+
+function selectRole(id) {
+  activeId = (activeId === id) ? null : id;
+  render();
+  if (activeId && markerMap[activeId]) {
+    map.panTo(markerMap[activeId].getLatLng(), { animate: true });
+    markerMap[activeId].openPopup();
+    const card = document.querySelector('.card.active');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function removeRole(id) {
+  const idx = roles.findIndex(r => r.id === id);
+  if (idx !== -1) roles.splice(idx, 1);
+  if (activeId === id) activeId = null;
+  render();
+}
+
+/* ── Filters UI ── */
+const filterBtn = document.getElementById('filter-btn');
+const filterPanel = document.getElementById('filter-panel');
+
+filterBtn.addEventListener('click', () => {
+  const open = filterPanel.classList.toggle('open');
+  filterBtn.classList.toggle('active', open);
+  filterBtn.setAttribute('aria-expanded', open);
+});
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const f = chip.dataset.filter;
+    const v = chip.dataset.val;
+    if (filters[f].has(v)) {
+      if (filters[f].size === 1) return; // keep at least one active per group
+      filters[f].delete(v);
+      chip.classList.remove('on');
+    } else {
+      filters[f].add(v);
+      chip.classList.add('on');
+    }
+    render();
+  });
+});
+
+document.getElementById('clear-filters').addEventListener('click', () => {
+  // Reset every filter group to all values using FILTER_DEFS
+  Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); });
+  document.querySelectorAll('.chip').forEach(c => c.classList.add('on'));
+  render();
+});
+
+// Generically checks whether every filter group is fully selected
+function updateFilterBtnState() {
+  const allSelected = Object.keys(FILTER_DEFS).every(
+    k => filters[k].size === FILTER_DEFS[k].length
+  );
+  filterBtn.classList.toggle('has-filters', !allSelected);
+}
+
+/* ── Search ── */
+document.getElementById('search').addEventListener('input', (e) => {
+  searchVal = e.target.value;
+  render();
+});
+
+/* ── Init ── */
+render();
+</script>
+</body>
+</html>
