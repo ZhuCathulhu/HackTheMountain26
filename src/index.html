@@ -120,11 +120,13 @@
     }
 
     if (await window.client.isAuthenticated()) {
-      const user = await window.client.getUser();
-      setTextContent("user-email", user.email);
-      setTextContent("user-profile", JSON.stringify(user, null, 2));
-      displayView("authenticated");
-      return;
+        /*const user = await window.client.getUser();
+        setTextContent("user-email", user.email);
+        setTextContent("user-profile", JSON.stringify(user, null, 2));
+        displayView("authenticated");
+        return;*/
+        window.location.href = "explore.html";
+        return;
     }
 
     displayView("unauthenticated");

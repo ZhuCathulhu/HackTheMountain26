@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-  <header>
-  
+<header>
   <div class="logo">PERFORMR</div>
-      <a href="#profile">Profile </a>
+  <button id="profile-btn" onclick="client.logout({logoutParams:{returnTo:location.origin}})">
+    <span id="user-email">Account</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </button>
 </header>
 
 <div class="contents">
@@ -347,6 +349,25 @@ document.getElementById('search').addEventListener('input', (e) => {
 
 /* ── Init ── */
 render();
+</script>
+
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+<script>
+  (async () => {
+    window.client = await auth0.createAuth0Client({
+      domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+      clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+      authorizationParams: { redirect_uri: location.origin },
+    });
+
+    if (!(await window.client.isAuthenticated())) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const user = await window.client.getUser();
+    document.getElementById('user-email').textContent = user.email;
+  })();
 </script>
 </body>
 </html>

@@ -346,3 +346,21 @@ nav a:hover {
     white-space: nowrap;
   }
   #rc-hint.show { opacity: 1; }
+
+  #profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid #e5e5e5;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  color: #333;
+  transition: background 0.15s;
+}
+
+#profile-btn:hover {
+  background: #f5f5f5;
+}
