@@ -443,6 +443,13 @@
         console.log('TOKEN:', token);
         console.log('PARTS:', token.split('.').length);
 
+<<<<<<< Updated upstream
+=======
+        if (!currentUser) {
+          currentUser = await auth0Client.getUser();
+        }
+
+>>>>>>> Stashed changes
       const res = await fetch(`${SUPABASE_URL}/rest/v1/roles`, {
         method: 'POST',
         headers: {

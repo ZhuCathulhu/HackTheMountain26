@@ -1,40 +1,33 @@
-// auth.js — shared Auth0 initializer for all pages
-// Usage: await initAuth()  → returns { client, user, token }
-// Usage: await initAuth({ public: true })  → skips redirect, returns { client } even if not logged in
+async function initApp() {
+  // Init Supabase
+  const { createClient } = supabase;
+  window.db = createClient(
+    'https://golijzcjitljymhpjaur.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk'
+  );
 
-const AUTH0_CONFIG = {
-  domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
-  clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-  authorizationParams: {
-    redirect_uri: location.origin,
-    audience: 'https://performr.api',
-  },
-  cacheLocation: 'localstorage',   // ← persists session across page navigations
-  useRefreshTokens: true,          // ← silently refreshes expired tokens
-};
+  // Init Auth0
+  window.client = await auth0.createAuth0Client({
+    domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+    clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+    authorizationParams: {
+      redirect_uri: location.origin,
+      audience: 'https://performr.api',
+    },
+    cacheLocation: 'localstorage',
+    useRefreshTokens: true,
+  });
 
-async function initAuth(opts = {}) {
-  const client = await auth0.createAuth0Client(AUTH0_CONFIG);
-
-  // If Auth0 just redirected back with a code, process it
-  if (location.search.includes('code=') && location.search.includes('state=')) {
-    try {
-      await client.handleRedirectCallback();
-    } catch (e) {
-      console.warn('handleRedirectCallback error (safe to ignore on direct nav):', e.message);
-    }
-    history.replaceState({}, document.title, location.pathname);
-  }
-
-  if (opts.public) return { client };
-
-  if (!(await client.isAuthenticated())) {
+  // Guard — redirect if not logged in
+  if (!await window.client.isAuthenticated()) {
     window.location.href = 'index.html';
-    return null;
+    return false;
   }
 
-  const user  = await client.getUser();
-  const token = await client.getTokenSilently();
+  // Set globals used by every page
+  window.currentUser = await window.client.getUser();
+  const token = await window.client.getTokenSilently();
+  window.db.functions.setAuth(token);
 
-  return { client, user, token };
+  return true;
 }
