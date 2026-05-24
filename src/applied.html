@@ -35,8 +35,30 @@
   <script src="auth.js"></script>
   <script>
     (async () => {
-      if (!await initApp()) return;
-
+      const { createClient } = supabase;
+      window.db = createClient(
+        'https://golijzcjitljymhpjaur.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk'
+      );
+      window.client = await auth0.createAuth0Client({
+        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+        authorizationParams: { redirect_uri: location.origin,
+          audience: 'https://performr.api',
+        },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
+      });
+ 
+      if (!(await window.client.isAuthenticated())) {
+        window.location.href = 'index.html';
+        return;
+      }
+ 
+      const user = await window.client.getUser();
+      window.currentUser = user;
+ 
+      // Fetch applications for this user, joining role details
       const { data, error } = await window.db
         .from('applications')
         .select('*, roles(*)')
