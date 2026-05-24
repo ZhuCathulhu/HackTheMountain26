@@ -176,6 +176,148 @@
       margin-bottom: 12px;
     }
     .portfolio-link:hover { text-decoration: underline; }
+
+    /* ── Plant Widget ── */
+    .plant-widget {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0;
+    }
+    .plant-bubble {
+      background: #320303;
+      color: #FFE169;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      letter-spacing: -.01em;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+    }
+    .plant-bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .plant-toggle {
+      background: #FAFAE8;
+      border: 2px dashed #460000;
+      border-radius: 20px;
+      padding: 10px 14px 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: transform .2s, background .15s;
+      position: relative;
+    }
+    .plant-toggle:hover { background: #F5ECD5; transform: scale(1.05); }
+    .plant-toggle:hover .plant-bubble { opacity: 1; transform: translateY(0); }
+    .plant-count-badge {
+      background: #320303;
+      color: #FFE169;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: .02em;
+    }
+
+    /* Plant drawer */
+    .plant-drawer {
+      position: fixed;
+      bottom: 0; right: 0;
+      width: 340px;
+      background: #F5ECD5;
+      border: 2px dashed #460000;
+      border-bottom: none;
+      border-right: none;
+      border-radius: 20px 0 0 0;
+      z-index: 600;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+      padding: 20px 20px 28px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .plant-drawer.open { transform: translateY(0); }
+    .plant-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .plant-drawer-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #460000;
+    }
+    .plant-drawer-close {
+      background: #320303;
+      border: none;
+      border-radius: 50%;
+      width: 28px; height: 28px;
+      color: #FFE169;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .plant-stage-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .plant-svg-wrap { flex-shrink: 0; }
+    .plant-text { flex: 1; }
+    .plant-stage-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1A0A0A;
+      margin-bottom: 4px;
+      letter-spacing: -.3px;
+    }
+    .plant-stage-desc {
+      font-size: 12px;
+      color: #5a3a1a;
+      line-height: 1.5;
+    }
+    .plant-progress-track {
+      height: 6px;
+      background: #e8d4b0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 5px;
+    }
+    .plant-progress-bar {
+      height: 100%;
+      background: #2D7A4F;
+      border-radius: 999px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+    .plant-progress-label {
+      font-size: 11px;
+      color: #8a6a3a;
+      font-weight: 600;
+    }
+    .plant-wobble { animation: pw-wobble .4s ease-in-out; }
+    @keyframes pw-wobble {
+      0%,100% { transform: rotate(0); }
+      25% { transform: rotate(-7deg); }
+      75% { transform: rotate(7deg); }
+    }
   </style>
 
   <div class="page">
@@ -217,6 +359,35 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- ── Plant Widget ── -->
+  <div class="plant-widget" id="plantWidget" style="display:none">
+    <div class="plant-bubble" id="plantBubble">your garden 🌱</div>
+    <div class="plant-toggle" id="plantToggle" onclick="togglePlantDrawer()">
+      <svg id="plantMiniSvg" width="56" height="64" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="plant-count-badge" id="plantCountBadge">0 applied</div>
+    </div>
+  </div>
+
+  <div class="plant-drawer" id="plantDrawer">
+    <div class="plant-drawer-header">
+      <span class="plant-drawer-title">your performr garden</span>
+      <button class="plant-drawer-close" onclick="togglePlantDrawer()">✕</button>
+    </div>
+    <div class="plant-stage-row">
+      <div class="plant-svg-wrap">
+        <svg id="plantMainSvg" width="100" height="120" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="plant-text">
+        <div class="plant-stage-name" id="plantStageName">A blank pot</div>
+        <div class="plant-stage-desc" id="plantStageDesc">Nothing's growing yet. Your plant is judging you silently.</div>
+      </div>
+    </div>
+    <div class="plant-progress-track">
+      <div class="plant-progress-bar" id="plantBar" style="width:0%"></div>
+    </div>
+    <div class="plant-progress-label" id="plantProgressLabel">Apply to a role to wake it up</div>
   </div>
 
   <script>
@@ -317,7 +488,200 @@
         img.alt = 'Profile photo';
         avatarEl.replaceWith(img);
       }
+
+      // ── Plant widget: fetch real application count ──
+      let appCount = 0;
+      try {
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: appRows } = await db
+          .from('applications')
+          .select('id')
+          .eq('applicant_id', user.sub);
+        appCount = appRows ? appRows.length : 0;
+      } catch(e) {
+        console.warn('Plant count fetch failed:', e);
+      }
+      initPlantWidget(appCount);
     })();
+
+    // ── Plant widget logic ──
+    const PLANT_STAGES = [
+      { min:0,  max:0,  name:'A blank pot',       desc:'Nothing\'s growing yet. Your plant is judging you silently.',      next:'Apply once to wake it up' },
+      { min:1,  max:2,  name:'A tiny sprout',      desc:'It\'s alive! Barely. It\'s looking at you like you might abandon it.', next:'{left} more to grow leaves' },
+      { min:3,  max:5,  name:'Getting weird',       desc:'It\'s developing a face. This is normal. Don\'t worry about it.',  next:'{left} more until full chaos' },
+      { min:6,  max:9,  name:'Full send mode',      desc:'It\'s vibrating. It knows things. It believes in you aggressively.', next:'{left} more to achieve nirvana' },
+      { min:10, max:14, name:'Enlightened shrub',   desc:'Your plant has transcended. It\'s writing your name on a mood board.', next:'{left} more to unlock final form' },
+      { min:15, max:99, name:'THE FINAL PLANT',     desc:'This is it. Peak performance. Your plant is you. You are the plant.', next:'Maximum unhinged. Respect.' },
+    ];
+
+    function getStage(n) {
+      return PLANT_STAGES.find(s => n >= s.min && n <= s.max) || PLANT_STAGES[PLANT_STAGES.length-1];
+    }
+
+    function drawPlantSvg(svgEl, n, scale) {
+      // scale: 1 = full (100x120 viewBox), 0.56 = mini (56x64 viewBox)
+      const W = 100, H = 120;
+      const ns = 'http://www.w3.org/2000/svg';
+      svgEl.innerHTML = '';
+
+      const stemH = n === 0 ? 0 : Math.min(8 + n * 9, 85);
+      const cx = 50, baseY = H - 10;
+
+      if (n === 0) {
+        const d = document.createElementNS(ns,'ellipse');
+        d.setAttribute('cx',cx); d.setAttribute('cy',baseY+2);
+        d.setAttribute('rx','22'); d.setAttribute('ry','6');
+        d.setAttribute('fill','#8B5E3C'); svgEl.appendChild(d);
+        return;
+      }
+
+      // stem
+      const stem = document.createElementNS(ns,'rect');
+      stem.setAttribute('x','47'); stem.setAttribute('y', baseY - stemH);
+      stem.setAttribute('width','6'); stem.setAttribute('height', stemH);
+      stem.setAttribute('rx','3'); stem.setAttribute('fill','#2D7A4F');
+      svgEl.appendChild(stem);
+
+      // leaves
+      const leafData = [
+        { minN:2, cx:36, ry: baseY - stemH*0.45, rx:16, ryE:9, fill:'#3a9060', rot:-30 },
+        { minN:3, cx:64, ry: baseY - stemH*0.62, rx:16, ryE:9, fill:'#4CAF50', rot:30 },
+        { minN:5, cx:34, ry: baseY - stemH*0.78, rx:14, ryE:8, fill:'#66BB6A', rot:-42 },
+      ];
+      leafData.forEach(l => {
+        if (n < l.minN) return;
+        const el = document.createElementNS(ns,'ellipse');
+        el.setAttribute('cx',l.cx); el.setAttribute('cy',l.ry);
+        el.setAttribute('rx',l.rx); el.setAttribute('ry',l.ryE);
+        el.setAttribute('fill',l.fill);
+        el.setAttribute('transform',`rotate(${l.rot} ${l.cx} ${l.ry})`);
+        svgEl.appendChild(el);
+      });
+
+      // head
+      const headY = baseY - stemH - 20;
+      const headR = Math.min(14 + n, 24);
+      const head = document.createElementNS(ns,'circle');
+      head.setAttribute('cx',cx); head.setAttribute('cy',headY);
+      head.setAttribute('r',headR); head.setAttribute('fill','#4CAF50');
+      svgEl.appendChild(head);
+
+      // spikes
+      if (n >= 3) {
+        const spikes = Math.min(3 + Math.floor(n/2), 8);
+        for (let i=0; i<spikes; i++) {
+          const ang = (-70 + i * 140/(spikes-1)) * Math.PI/180;
+          const sx = cx + Math.cos(ang)*headR*0.85, sy = headY + Math.sin(ang)*headR*0.85;
+          const tx = cx + Math.cos(ang)*(headR+8+(i%2)*5), ty = headY + Math.sin(ang)*(headR+8+(i%2)*5);
+          const sp = document.createElementNS(ns,'line');
+          sp.setAttribute('x1',sx); sp.setAttribute('y1',sy);
+          sp.setAttribute('x2',tx); sp.setAttribute('y2',ty);
+          sp.setAttribute('stroke','#2D7A4F'); sp.setAttribute('stroke-width','2.5');
+          sp.setAttribute('stroke-linecap','round'); svgEl.appendChild(sp);
+        }
+      }
+
+      // eyes
+      const eyeY = headY - 3, eyeR = n >= 6 ? 4 : 3;
+      [cx-7, cx+7].forEach(ex => {
+        const e = document.createElementNS(ns,'circle');
+        e.setAttribute('cx',ex); e.setAttribute('cy',eyeY);
+        e.setAttribute('r',eyeR); e.setAttribute('fill','#1A0A0A'); svgEl.appendChild(e);
+        const shine = document.createElementNS(ns,'circle');
+        shine.setAttribute('cx',ex+1.5); shine.setAttribute('cy',eyeY-1.5);
+        shine.setAttribute('r','1.2'); shine.setAttribute('fill','#fff'); svgEl.appendChild(shine);
+      });
+
+      // mouth
+      const mY = headY + 6;
+      if (n >= 10) {
+        const m = document.createElementNS(ns,'path');
+        m.setAttribute('d',`M ${cx-10} ${mY} Q ${cx} ${mY+10} ${cx+10} ${mY}`);
+        m.setAttribute('fill','none'); m.setAttribute('stroke','#1A0A0A');
+        m.setAttribute('stroke-width','2'); m.setAttribute('stroke-linecap','round'); svgEl.appendChild(m);
+        for (let t=0; t<3; t++) {
+          const tooth = document.createElementNS(ns,'rect');
+          tooth.setAttribute('x', cx-7+t*6); tooth.setAttribute('y',mY+1);
+          tooth.setAttribute('width','4'); tooth.setAttribute('height','4');
+          tooth.setAttribute('rx','1'); tooth.setAttribute('fill','#fff'); svgEl.appendChild(tooth);
+        }
+      } else if (n >= 6) {
+        const m = document.createElementNS(ns,'path');
+        m.setAttribute('d',`M ${cx-8} ${mY} Q ${cx} ${mY+7} ${cx+8} ${mY}`);
+        m.setAttribute('fill','none'); m.setAttribute('stroke','#1A0A0A');
+        m.setAttribute('stroke-width','1.8'); m.setAttribute('stroke-linecap','round'); svgEl.appendChild(m);
+      } else if (n >= 3) {
+        const m = document.createElementNS(ns,'path');
+        m.setAttribute('d',`M ${cx-6} ${mY+2} Q ${cx} ${mY+5} ${cx+6} ${mY+2}`);
+        m.setAttribute('fill','none'); m.setAttribute('stroke','#1A0A0A');
+        m.setAttribute('stroke-width','1.8'); m.setAttribute('stroke-linecap','round'); svgEl.appendChild(m);
+      } else {
+        const m = document.createElementNS(ns,'line');
+        m.setAttribute('x1',cx-5); m.setAttribute('y1',mY+2);
+        m.setAttribute('x2',cx+5); m.setAttribute('y2',mY+2);
+        m.setAttribute('stroke','#1A0A0A'); m.setAttribute('stroke-width','1.8');
+        m.setAttribute('stroke-linecap','round'); svgEl.appendChild(m);
+      }
+
+      // stars
+      if (n >= 15) {
+        [[18,32],[82,42],[15,70],[85,74]].forEach(([sx,sy]) => {
+          const st = document.createElementNS(ns,'text');
+          st.setAttribute('x',sx); st.setAttribute('y',sy);
+          st.setAttribute('font-size','12'); st.setAttribute('text-anchor','middle');
+          st.setAttribute('fill','#FFE169'); st.textContent = '✦'; svgEl.appendChild(st);
+        });
+      } else if (n >= 10) {
+        [[20,38],[80,50]].forEach(([sx,sy]) => {
+          const st = document.createElementNS(ns,'text');
+          st.setAttribute('x',sx); st.setAttribute('y',sy);
+          st.setAttribute('font-size','11'); st.setAttribute('text-anchor','middle');
+          st.setAttribute('fill','#FFE169'); st.textContent = '✦'; svgEl.appendChild(st);
+        });
+      }
+    }
+
+    function updatePlantUI(n) {
+      const stage = getStage(n);
+      const nextStage = PLANT_STAGES.find(s => s.min > n);
+      document.getElementById('plantStageName').textContent = stage.name;
+      document.getElementById('plantStageDesc').textContent = stage.desc;
+      document.getElementById('plantCountBadge').textContent = n + (n === 1 ? ' applied' : ' applied');
+
+      const left = nextStage ? nextStage.min - n : 0;
+      document.getElementById('plantProgressLabel').textContent = stage.next.replace('{left}', left);
+
+      const pct = stage.min === stage.max ? 100
+        : Math.round(((n - stage.min) / (stage.max - stage.min)) * 100);
+      document.getElementById('plantBar').style.width = Math.min(pct, 100) + '%';
+
+      drawPlantSvg(document.getElementById('plantMainSvg'), n, 1);
+      drawPlantSvg(document.getElementById('plantMiniSvg'), n, 0.56);
+
+      // wobble
+      const mainSvg = document.getElementById('plantMainSvg');
+      mainSvg.classList.remove('plant-wobble');
+      void mainSvg.offsetWidth;
+      mainSvg.classList.add('plant-wobble');
+    }
+
+    function initPlantWidget(n) {
+      document.getElementById('plantWidget').style.display = 'flex';
+      updatePlantUI(n);
+      // Show bubble briefly on load
+      setTimeout(() => {
+        const bubble = document.getElementById('plantBubble');
+        bubble.classList.add('visible');
+        setTimeout(() => bubble.classList.remove('visible'), 2500);
+      }, 800);
+    }
+
+    let drawerOpen = false;
+    function togglePlantDrawer() {
+      drawerOpen = !drawerOpen;
+      document.getElementById('plantDrawer').classList.toggle('open', drawerOpen);
+    }
   </script>
 
 </body>
