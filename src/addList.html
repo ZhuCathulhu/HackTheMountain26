@@ -13,128 +13,11 @@
 
     body {
       font-family: 'DM Sans', sans-serif;
-      background: #f7f7f5;
+      background: #ff6558;
       min-height: 100vh;
     }
 
-    /* ── reuse your header/tab styles ── */
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #e8e8e4;
-      background: #fff;
-    }
-    .right { display: flex; align-items: center; gap: .4rem; }
-    .logo { font-size: 1.1rem; font-weight: 700; letter-spacing: -.02em; }
-    .logo-dot { width: 6px; height: 6px; border-radius: 50%; background: #000; }
-
-    .tab-bar {
-      display: flex;
-      border-bottom: 1px solid #e8e8e4;
-      background: #fff;
-    }
-    .tab-bar a {
-      padding: .75rem 1.25rem;
-      font-size: .875rem;
-      font-weight: 500;
-      color: #888;
-      text-decoration: none;
-      border-bottom: 2px solid transparent;
-      transition: color .15s, border-color .15s;
-    }
-    .tab-bar a:hover { color: #000; }
-    .tab-bar .tab-listings { color: #000; border-bottom-color: #000; }
-
-    /* ── page layout ── */
-    .add-page {
-      max-width: 600px;
-      margin: 2.5rem auto;
-      padding: 0 1.25rem 4rem;
-    }
-
-    .page-heading {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .back-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      border: 1.5px solid #ddd;
-      background: #fff;
-      cursor: pointer;
-      font-size: 1.1rem;
-      text-decoration: none;
-      color: #000;
-      transition: background .15s, border-color .15s;
-    }
-    .back-btn:hover { background: #f0f0f0; }
-
-    .page-heading h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -.03em;
-    }
-
-    /* ── form card ── */
-    .form-card {
-      background: #fff;
-      border-radius: 16px;
-      border: 1px solid #e8e8e4;
-      overflow: hidden;
-    }
-
-    .form-section {
-      padding: 1.5rem;
-      border-bottom: 1px solid #f0f0ec;
-    }
-    .form-section:last-of-type { border-bottom: none; }
-
-    .section-label {
-      font-size: .7rem;
-      font-weight: 600;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: #aaa;
-      margin-bottom: 1rem;
-    }
-
-    .field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; }
-    .field:last-child { margin-bottom: 0; }
-
-    .field label {
-      font-size: .8rem;
-      font-weight: 600;
-      color: #555;
-    }
-
-    .field input,
-    .field select,
-    .field textarea {
-      font-family: 'DM Sans', sans-serif;
-      font-size: .9rem;
-      padding: .65rem .85rem;
-      border: 1.5px solid #e4e4e0;
-      border-radius: 8px;
-      background: #fafafa;
-      color: #111;
-      outline: none;
-      transition: border-color .15s, background .15s;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: #111;
-      background: #fff;
-    }
+   
     .field input::placeholder,
     .field textarea::placeholder { color: #bbb; }
 
@@ -274,28 +157,31 @@
         </label>
       </section>
 
-      <!-- LOCATION -->
+    <form>
+      <section>
+        <p>Location</p>
       <div class="form-section">
-        <div class="section-label">Location</div>
         <div class="field">
-  <label for="roleAddr">Address</label>
-  <div style="display:flex; gap:.5rem; align-items:flex-start;">
-    <input id="roleAddr" type="text" placeholder="123 Main St" style="flex:1;" />
-    <button type="button" id="geocodeBtn" style="
-      padding: .65rem .9rem;
-      background: #111;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: .8rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background .15s;
-    " onmouseenter="this.style.background='#333'" onmouseleave="this.style.background='#111'">
-      📍 Geocode
-    </button>
-  </div>
+  <label>Address</label>
+  <div>
+  <input id="roleAddr" type="text" placeholder="123 Main St" style="width:100%;" />
+  <button type="button" id="geocodeBtn" style="
+    display: block;
+    margin-top: .5rem;
+    padding: .65rem .9rem;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s;
+  " onmouseenter="this.style.background='#333'" onmouseleave="this.style.background='#111'">
+    📍 Geocode
+  </button>
+</div>
   <p id="geocodeStatus" style="font-size:.75rem; color:#888; margin-top:.3rem;"></p>
 </div>
         <div class="field-row">
@@ -320,11 +206,11 @@
         </div>
         <div class="row">
           <label>
-            Latitude <small>(optional)</small>
+            Latitude <small>(geocode)</small>
             <input id="roleLat" type="number" step="any" placeholder="45.5017" />
           </label>
           <label>
-            Longitude <small>(optional)</small>
+            Longitude <small>(geocode)</small>
             <input id="roleLng" type="number" step="any" placeholder="-73.5673" />
           </label>
         </div>
