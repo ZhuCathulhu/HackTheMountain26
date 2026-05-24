@@ -391,89 +391,83 @@
     document.querySelectorAll('#uniformPills .pill').forEach(pill => {
       pill.addEventListener('click', () => {
         pill.classList.toggle('selected');
-        // clear free-text if a pill is clicked
         document.getElementById('uniformOther').value = '';
       });
     });
+  })();
 
-    // ── Submit ──
-    async function submitRole() {
-      const btn = document.getElementById('submitBtn');
-      const errEl = document.getElementById('errorMsg');
-      errEl.style.display = 'none';
+  // ── Submit ──
+  async function submitRole() {
+    const btn = document.getElementById('submitBtn');
+    const errEl = document.getElementById('errorMsg');
+    errEl.style.display = 'none';
 
-      const name = document.getElementById('roleName').value.trim();
-      if (!name) {
-        errEl.textContent = 'Role name is required.';
-        errEl.style.display = 'block';
-        return;
-      }
+    const name = document.getElementById('roleName').value.trim();
+    if (!name) {
+      errEl.textContent = 'Role name is required.';
+      errEl.style.display = 'block';
+      return;
+    }
 
-      // Resolve genre
-      const genreSelect = document.getElementById('roleGenre').value;
-      const genre = genreSelect === 'Other'
-        ? document.getElementById('genreOther').value.trim()
-        : genreSelect;
+    const genreSelect = document.getElementById('roleGenre').value;
+    const genre = genreSelect === 'Other'
+      ? document.getElementById('genreOther').value.trim()
+      : genreSelect;
 
-      // Resolve uniform — pills take priority, else free-text
-      const selectedPills = [...document.querySelectorAll('#uniformPills .pill.selected')]
-        .map(p => p.dataset.value);
-      const uniform = selectedPills.length > 0
-        ? selectedPills.join(', ')
-        : document.getElementById('uniformOther').value.trim();
+    const selectedPills = [...document.querySelectorAll('#uniformPills .pill.selected')]
+      .map(p => p.dataset.value);
+    const uniform = selectedPills.length > 0
+      ? selectedPills.join(', ')
+      : document.getElementById('uniformOther').value.trim();
 
-      const lat = parseFloat(document.getElementById('roleLat').value) || null;
-      const lng = parseFloat(document.getElementById('roleLng').value) || null;
+    const lat = parseFloat(document.getElementById('roleLat').value) || null;
+    const lng = parseFloat(document.getElementById('roleLng').value) || null;
 
-      const payload = {
-        name,
-        genre:      genre || null,
-        level:      document.getElementById('roleLevel').value || null,
-        addr:       document.getElementById('roleAddr').value.trim() || null,
-        city:       document.getElementById('roleCity').value.trim() || null,
-        location:   document.getElementById('roleLocation').value || null,
-        uniform:    uniform || null,
-        lat,
-        lng,
-        created_by: currentUser.sub,
-      };
+    const payload = {
+      name,
+      genre:      genre || null,
+      level:      document.getElementById('roleLevel').value || null,
+      addr:       document.getElementById('roleAddr').value.trim() || null,
+      city:       document.getElementById('roleCity').value.trim() || null,
+      location:   document.getElementById('roleLocation').value || null,
+      uniform:    uniform || null,
+      lat,
+      lng,
+      created_by: window.currentUser.sub,
+    };
 
-      btn.disabled = true;
-      btn.textContent = 'Publishing…';
+    btn.disabled = true;
+    btn.textContent = 'Publishing…';
 
       try {
         const token = await auth0Client.getTokenSilently();
         console.log('TOKEN:', token);
         console.log('PARTS:', token.split('.').length);
 
-        if (!currentUser) {
-          currentUser = await auth0Client.getUser();
-        }
+      const res = await fetch('https://golijzcjitljymhpjaur.supabase.co/rest/v1/roles', {
+        method: 'POST',
+        headers: {
+          'apikey':        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type':  'application/json',
+          'Prefer':        'return=representation',
+        },
+        body: JSON.stringify(payload),
+      });
 
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/roles`, {
-          method: 'POST',
-          headers: {
-            'apikey':        SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${token}`,
-            'Content-Type':  'application/json',
-            'Prefer':        'return=representation',
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (res.ok) {
-          window.location.href = 'listings.html';
-        } else {
-          const err = await res.json();
-          throw new Error(err.message ?? JSON.stringify(err));
-        }
-      } catch (e) {
-        errEl.textContent = 'Error: ' + e.message;
-        errEl.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Publish Role →';
+      if (res.ok) {
+        window.location.href = 'listings.html';
+      } else {
+        const err = await res.json();
+        throw new Error(err.message ?? JSON.stringify(err));
       }
+    } catch (e) {
+      errEl.textContent = 'Error: ' + e.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Publish Role →';
     }
-  </script>
+  }
+</script>
 </body>
 </html>
