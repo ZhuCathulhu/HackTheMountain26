@@ -30,19 +30,20 @@
 
     <article>
       <div class="avatar-row">
-        <div class="avatar"></div>
+        <div id="avatar-el" class="avatar"></div>
         <button class="create" style="font-size:13px; padding:6px 16px;">Change photo</button>
       </div>
 
       <div class="profile-body">
-        <h2>Jane Doe <small>(she/her)</small></h2>
-        <div class="pills">
-          <span class="on">Pianist</span>
-          <span class="on">Intermediate</span>
-          <span class="on">Has Car</span>
-        </div>
+        <h2 id="profile-name"> <small id="profile-email"></small></h2>
+        <p id="profile-location" style="font-size:13px; color:#460000; margin-bottom:8px;"></p>
+        <div class="pills" id="profile-tags"></div>
         <h3>Bio</h3>
-        <p>Second-year student looking to help out on indie sets or jam with local bands. Down for last-minute calls!</p>
+        <p id="profile-bio"></p>
+        <p id="portfolio-wrap" style="display:none; margin-top:12px;">
+          <a id="portfolio-link" href="#" target="_blank" rel="noopener"
+             style="font-size:13px; font-weight:600; color:#460000;">🔗 Portfolio</a>
+        </p>
       </div>
     </article>
 
@@ -59,15 +60,97 @@
     </ul>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
-  <script src="auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
+
+    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+    function addTag(container, text) {
+      if (!text) return;
+      const span = document.createElement('span');
+      span.className = 'on'; // .pills span.on = active pill style
+      span.textContent = cap(text);
+      container.appendChild(span);
+    }
+
     (async () => {
-      if (!await initApp()) return;
-      document.getElementById('logout-btn').addEventListener('click', () => {
-        window.client.logout({ logoutParams: { returnTo: window.location.origin } });
+      const client = await auth0.createAuth0Client({
+        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+        authorizationParams: { redirect_uri: location.origin, audience: 'https://performr.api' },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
       });
+
+      if (!(await client.isAuthenticated())) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const user = await client.getUser();
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        client.logout({ logoutParams: { returnTo: window.location.origin } });
+      });
+
+      // Fetch profile from Supabase
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(user.sub)}&limit=1`,
+        {
+          headers: {
+            'apikey':        SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Accept':        'application/json',
+          }
+        }
+      );
+
+      const rows = await res.json();
+      const profile = rows?.[0] ?? null;
+
+      // Name
+      document.getElementById('profile-name').childNodes[0].textContent =
+        (profile?.display_name || user.name || user.email) + ' ';
+
+      // Email shown as subtitle
+      document.getElementById('profile-email').textContent =
+        profile?.email || user.email || '';
+
+      // Location
+      const locEl = document.getElementById('profile-location');
+      if (profile?.location) locEl.textContent = '📍 ' + profile.location;
+
+      // Tags
+      const tagsEl = document.getElementById('profile-tags');
+      if (profile?.discipline_detail) addTag(tagsEl, profile.discipline_detail);
+      else if (profile?.discipline)   addTag(tagsEl, profile.discipline);
+      if (profile?.role)     addTag(tagsEl, profile.role);
+      if (profile?.org_user) addTag(tagsEl, profile.org_user);
+
+      // Bio
+      const bioEl = document.getElementById('profile-bio');
+      if (profile?.bio) bioEl.textContent = profile.bio;
+
+      // Portfolio
+      if (profile?.portfolio_url) {
+        const wrap = document.getElementById('portfolio-wrap');
+        const link = document.getElementById('portfolio-link');
+        link.href = profile.portfolio_url;
+        wrap.style.display = 'block';
+      }
+
+      // Avatar
+      if (user.picture) {
+        const avatarEl = document.getElementById('avatar-el');
+        const img = document.createElement('img');
+        img.src = user.picture;
+        img.className = 'avatar';
+        img.alt = 'Profile photo';
+        avatarEl.replaceWith(img);
+      }
     })();
   </script>
 </body>

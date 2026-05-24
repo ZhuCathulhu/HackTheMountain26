@@ -137,6 +137,30 @@
           return;
         }
         history.replaceState({}, "", location.pathname);
+        // Flush any profile data saved by signup.html before the Auth0 redirect
+        const pendingProfile = localStorage.getItem('performr_pending_profile');
+        if (pendingProfile) {
+          localStorage.removeItem('performr_pending_profile');
+          try {
+            const user = await client.getUser();
+            const profile = { ...JSON.parse(pendingProfile), id: user.sub, email: user.email };
+            const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
+            await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+              method: 'POST',
+              headers: {
+                'apikey':        SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type':  'application/json',
+                'Prefer':        'return=minimal',
+              },
+              body: JSON.stringify(profile),
+            });
+          } catch (e) {
+            console.warn('Could not flush pending profile:', e.message);
+          }
+        }
+
         window.location.href = "explore.html";
         return;
       }
@@ -148,7 +172,7 @@
       }
 
       // Wire up all signup/signin buttons
-      const signup = () => client.loginWithRedirect({ authorizationParams: { screen_hint: 'signup' } });
+      const signup = () => { window.location.href = 'signup.html'; };
       const signin = () => client.loginWithRedirect();
 
       document.getElementById('btn-signup').addEventListener('click', e => { e.preventDefault(); signup(); });

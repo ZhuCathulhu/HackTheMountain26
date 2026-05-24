@@ -135,7 +135,7 @@ aside input[type="search"]:focus { border-color: #FF6558; background: #fff; }
 
 /* Filter panel */
 
-#filters {
+#filter-panel {
   display: none;
   flex-direction: column;
   gap: 12px;
@@ -145,16 +145,15 @@ aside input[type="search"]:focus { border-color: #FF6558; background: #fff; }
   max-height: 260px;
   overflow-y: auto;
 }
-#filters.open { display: flex; }
+#filter-panel.open { display: flex; }
 
-fieldset {
-  border: none;
+.filter-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-legend {
+.filter-group > label {
   font-family: 'Montserrat', sans-serif;
   font-size: 11px;
   font-weight: 700;
@@ -164,25 +163,18 @@ legend {
   margin-bottom: 4px;
 }
 
-fieldset > button,
-.chip {
-  display: inline-block;
-  padding: 5px 14px;
-  font-size: 12px;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 500;
-  border: 2px dashed #460000;
-  border-radius: 999px;
-  background: #FFFEE0;
-  color: #460000;
-  cursor: pointer;
-  transition: transform 0.15s ease;
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
-.chip:hover { background: #FFE169; transform: translateY(-1px); }
-.chip.on { background: #FF6558; border-color: #460000; color: #321F1F; font-weight: 600; }
 
-#clear-filters {
-  align-self: flex-end;
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.clear-filters {
   font-size: 12px;
   font-family: 'Montserrat', sans-serif;
   color: #460000;
@@ -191,22 +183,21 @@ fieldset > button,
   cursor: pointer;
   text-decoration: underline;
 }
-#clear-filters:hover { color: #FF6558; }
+.clear-filters:hover { color: #FF6558; }
 
 /* Cards list */
 
-aside ul {
+#cards {
   flex: 1;
   overflow-y: auto;
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  list-style: none;
 }
 
-aside ul li {
-  padding: 18px 20px;
+.card {
+  padding: 14px 16px;
   border-radius: 16px;
   background: #FFF9D6;
   border: 2.5px dashed transparent;
@@ -214,22 +205,57 @@ aside ul li {
   position: relative;
   transition: transform 0.2s ease;
 }
-aside ul li:hover { transform: translateY(-2px); border-color: #460000; }
-aside ul li.active { border-color: #FF6558; background: #FFE169; }
+.card:hover { transform: translateY(-2px); border-color: #460000; }
+.card.active { border-color: #FF6558; background: #FFE169; }
 
-aside > p { padding: 40px 24px; text-align: center; color: #460000; font-size: 13px; opacity: 0.6; }
+.card-row1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
 
-aside ul li strong {
+.pin-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #ED6E1C;
+  flex-shrink: 0;
+}
+
+.card-name {
   font-family: 'Playfair Display', serif;
   font-size: 15px;
-  display: block;
-  margin-bottom: 4px;
+  font-weight: 700;
   color: #321F1F;
+  flex: 1;
 }
-aside ul li em     { font-size: 10px; font-style: normal; text-transform: uppercase; letter-spacing: 0.6px; color: #460000; opacity: 0.6; font-weight: 600; }
-aside ul li p      { font-size: 12px; color: #321F1F; opacity: 0.7; margin: 4px 0 8px; }
-aside ul li footer { display: flex; flex-wrap: wrap; gap: 6px; }
-aside ul li footer span {
+
+.card-type-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #8B5CF6;
+  color: #fff;
+  border: 1.5px dashed #460000;
+}
+
+.card-addr {
+  font-size: 12px;
+  color: #321F1F;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-pill {
   font-size: 11px;
   font-weight: 600;
   padding: 4px 12px;
@@ -238,7 +264,8 @@ aside ul li footer span {
   border: 1.5px dashed #460000;
   color: #321F1F;
 }
-aside ul li button {
+
+.card-remove {
   position: absolute;
   top: 10px; right: 10px;
   width: 22px; height: 22px;
@@ -250,8 +277,25 @@ aside ul li button {
   border-radius: 4px;
   opacity: 0;
 }
-aside ul li:hover button { opacity: 1; }
-aside ul li button:hover { background: #FFE169; color: #460000; }
+.card:hover .card-remove { opacity: 1; }
+.card-remove:hover { background: #FFE169; color: #460000; }
+
+.card-apply {
+  margin-top: 8px;
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  border: 2px dashed #460000;
+  border-radius: 999px;
+  background: #460000;
+  color: #FFE169;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s;
+}
+.card-apply:hover { transform: translateY(-1px); background: #321F1F; }
+.card-apply.applied { background: #FFF9D6; color: #460000; cursor: default; }
+.card-apply.loading { opacity: 0.6; cursor: wait; }
 
 /* Map */
 
@@ -259,7 +303,7 @@ aside ul li button:hover { background: #FFE169; color: #460000; }
 
 /* Hint toast */
 
-#hint {
+#rc-hint {
   position: absolute;
   bottom: 24px;
   left: calc(540px + 50%);
@@ -278,7 +322,7 @@ aside ul li button:hover { background: #FFE169; color: #460000; }
   z-index: 10;
   white-space: nowrap;
 }
-#hint.show { opacity: 1; }
+#rc-hint.show { opacity: 1; }
 
 /* Leaflet popup tweaks */
 

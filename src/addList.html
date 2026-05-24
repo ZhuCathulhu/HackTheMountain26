@@ -22,10 +22,10 @@
   </nav>
 
   <main>
-<div class="page-header">
-  <a href="listings.html" class="back">←</a>
-  <h1>Create a Role</h1>
-</div>
+    <div class="page-header">
+      <a href="listings.html" class="back">←</a>
+      <h1>Create a Role</h1>
+    </div>
 
     <form>
       <section>
@@ -133,22 +133,44 @@
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="auth.js"></script>
   <script>
+    const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
+
+    let currentUser = null;
+    let auth0Client = null;
+
     (async () => {
-      if (!await initApp()) return;
-
-      document.getElementById('roleGenre').addEventListener('change', function () {
-        document.getElementById('genreOtherField').hidden = this.value !== 'Other';
+      auth0Client = await auth0.createAuth0Client({
+        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+        authorizationParams: {
+          redirect_uri: location.origin,
+          audience: 'https://performr.api',
+        },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
       });
 
-      document.querySelectorAll('#uniformPills span').forEach(pill => {
-        pill.addEventListener('click', () => {
-          pill.classList.toggle('on');
-          document.getElementById('uniformOther').value = '';
-        });
-      });
+      if (!(await auth0Client.isAuthenticated())) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      currentUser = await auth0Client.getUser();
     })();
+
+    document.getElementById('roleGenre').addEventListener('change', function () {
+      document.getElementById('genreOtherField').hidden = this.value !== 'Other';
+    });
+
+    // Uniform pill toggle — use .on to match style.css
+    document.querySelectorAll('#uniformPills span').forEach(pill => {
+      pill.addEventListener('click', () => {
+        pill.classList.toggle('on');
+        document.getElementById('uniformOther').value = '';
+      });
+    });
 
     async function submitRole() {
       const errEl = document.getElementById('errorMsg');
@@ -163,40 +185,46 @@
         ? document.getElementById('genreOther').value.trim()
         : genreSelect;
 
+      // Read pills that have .on (matches style.css active state)
       const selectedPills = [...document.querySelectorAll('#uniformPills span.on')].map(p => p.dataset.value);
       const uniform = selectedPills.length
         ? selectedPills.join(', ')
         : document.getElementById('uniformOther').value.trim();
 
+      const lat = parseFloat(document.getElementById('roleLat').value) || null;
+      const lng = parseFloat(document.getElementById('roleLng').value) || null;
+
+      const payload = {
+        name,
+        genre:      genre || null,
+        level:      document.getElementById('roleLevel').value || null,
+        addr:       document.getElementById('roleAddr').value.trim() || null,
+        city:       document.getElementById('roleCity').value.trim() || null,
+        location:   document.getElementById('roleLocation').value || null,
+        uniform:    uniform || null,
+        lat,
+        lng,
+        created_by: currentUser.sub,
+      };
+
       btn.disabled = true;
       btn.textContent = 'Publishing…';
 
       try {
-        const token = await window.client.getTokenSilently();
-        const res = await fetch('https://golijzcjitljymhpjaur.supabase.co/rest/v1/roles', {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/roles`, {
           method: 'POST',
           headers: {
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk',
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation',
+            'apikey':        SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type':  'application/json',
+            'Prefer':        'return=representation',
           },
-          body: JSON.stringify({
-            name,
-            genre:      genre || null,
-            level:      document.getElementById('roleLevel').value || null,
-            addr:       document.getElementById('roleAddr').value.trim() || null,
-            city:       document.getElementById('roleCity').value.trim() || null,
-            location:   document.getElementById('roleLocation').value || null,
-            uniform:    uniform || null,
-            lat:        parseFloat(document.getElementById('roleLat').value) || null,
-            lng:        parseFloat(document.getElementById('roleLng').value) || null,
-            created_by: window.currentUser.sub,
-          }),
+          body: JSON.stringify(payload),
         });
 
-        if (res.ok) { window.location.href = 'listings.html'; }
-        else {
+        if (res.ok) {
+          window.location.href = 'listings.html';
+        } else {
           const err = await res.json();
           throw new Error(err.message ?? JSON.stringify(err));
         }
