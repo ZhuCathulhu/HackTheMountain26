@@ -81,18 +81,26 @@
  
       data.forEach(application => {
         const role = application.roles;
+        if (!role) return; // deleted role
+        const statusColor = {
+          pending:  '#888',
+          accepted: '#2D7A4F',
+          rejected: '#B83232',
+        }[application.status] ?? '#888';
         const card = document.createElement('div');
         card.className = 'role-card';
         card.innerHTML = `
-          <h2>${role.name}</h2>
-          <p class="card-address">${role.addr ? role.addr + ', ' : ''}${role.city}</p>
+          <h2>${role.name ?? '—'}</h2>
+          <p class="card-address">${role.addr ? role.addr + ', ' : ''}${role.city ?? ''}</p>
           <div class="card-tags">
-            <span class="tag-pill">${role.genre}</span>
-            <span class="tag-pill">${role.level}</span>
-            <span class="tag-pill">${role.location}</span>
-            <span class="tag-pill">${role.uniform}</span>
+            ${role.genre    ? `<span class="tag-pill">${role.genre}</span>`    : ''}
+            ${role.level    ? `<span class="tag-pill">${role.level}</span>`    : ''}
+            ${role.location ? `<span class="tag-pill">${role.location}</span>` : ''}
+            ${role.uniform  ? `<span class="tag-pill">${role.uniform}</span>`  : ''}
           </div>
-          <p class="card-desc">Status: <strong>${application.status}</strong></p>
+          <p class="card-desc" style="margin-top:8px; font-size:13px;">
+            Status: <strong style="color:${statusColor}">${application.status}</strong>
+          </p>
         `;
         grid.appendChild(card);
       });
