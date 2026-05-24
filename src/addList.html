@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -288,9 +289,26 @@
       <div class="form-section">
         <div class="section-label">Location</div>
         <div class="field">
-          <label for="roleAddr">Address</label>
-          <input id="roleAddr" type="text" placeholder="123 Main St" />
-        </div>
+  <label for="roleAddr">Address</label>
+  <div style="display:flex; gap:.5rem; align-items:flex-start;">
+    <input id="roleAddr" type="text" placeholder="123 Main St" style="flex:1;" />
+    <button type="button" id="geocodeBtn" style="
+      padding: .65rem .9rem;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+    " onmouseenter="this.style.background='#333'" onmouseleave="this.style.background='#111'">
+      📍 Geocode
+    </button>
+  </div>
+  <p id="geocodeStatus" style="font-size:.75rem; color:#888; margin-top:.3rem;"></p>
+</div>
         <div class="field-row">
           <div class="field">
             <label for="roleCity">City</label>
@@ -350,6 +368,9 @@
 
     </div>
   </div>
+  
+
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -394,6 +415,62 @@
         document.getElementById('uniformOther').value = '';
       });
     });
+
+  document.getElementById('geocodeBtn').addEventListener('click', async () => {
+  const addr   = document.getElementById('roleAddr').value.trim();
+  const city   = document.getElementById('roleCity').value.trim();
+  const query  = [addr, city].filter(Boolean).join(', ');
+  const status = document.getElementById('geocodeStatus');
+
+  if (!query) {
+    status.textContent = 'Enter an address or city first.';
+    status.style.color = '#c00';
+    return;
+  }
+
+  status.textContent = 'Looking up coordinates…';
+  status.style.color = '#888';
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+    const res  = await fetch(url, {
+      headers: { 'Accept-Language': 'en' }
+    });
+    const data = await res.json();
+
+    if (!data.length) {
+      status.textContent = '⚠️ Address not found. Try adding a city or country.';
+      status.style.color = '#c00';
+      return;
+    }
+
+    document.getElementById('roleLat').value = parseFloat(data[0].lat).toFixed(6);
+    document.getElementById('roleLng').value = parseFloat(data[0].lon).toFixed(6);
+    status.textContent = `✓ Found: ${data[0].display_name}`;
+    status.style.color = '#2a7a2a';
+
+  } catch (e) {
+    status.textContent = '⚠️ Geocoding failed: ' + e.message;
+    status.style.color = '#c00';
+  }
+});
+
+  status.textContent = 'Looking up coordinates…';
+  status.style.color = '#888';
+
+  const geocoder = L.Control.Geocoder.nominatim();
+  geocoder.geocode(query, (results) => {
+    if (!results || results.length === 0) {
+      status.textContent = '⚠️ Address not found. Try adding a city or country.';
+      status.style.color = '#c00';
+      return;
+    }
+    const { lat, lng } = results[0].center;
+    document.getElementById('roleLat').value = lat.toFixed(6);
+    document.getElementById('roleLng').value = lng.toFixed(6);
+    status.textContent = `✓ Found: ${results[0].name}`;
+    status.style.color = '#2a7a2a';
+  });
 
   // ── Submit ──
   async function submitRole() {
@@ -472,5 +549,6 @@
     }
   }
 </script>
+
 </body>
 </html>
