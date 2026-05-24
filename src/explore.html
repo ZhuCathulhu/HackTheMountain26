@@ -342,6 +342,7 @@ document.getElementById('search').addEventListener('input', (e) => {
 async function loadRoles() {
     try {
     const { data, error } = await window.db.from('roles').select('*');
+
     if (error) {
       console.error('Supabase load failed:', error.message, '| details:', error.details, '| hint:', error.hint, '| code:', error.code);
       return;
@@ -388,7 +389,9 @@ async function loadRoles() {
 
     const user = await window.client.getUser();
     //document.getElementById('user-email').textContent = user.email;
-  
+    window.currentUser = user;
+    const token = await window.client.getTokenSilently();
+    window.db.functions.setAuth(token);
     loadRoles();
   })();
 </script>
