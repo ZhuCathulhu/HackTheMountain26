@@ -308,6 +308,57 @@
       color: #8a6a3a;
       font-weight: 600;
     }
+
+    /* ── Media grid ── */
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .media-item {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      border: 3px dashed #520606;
+      overflow: hidden;
+      position: relative;
+      background: #FFA958;
+    }
+    .media-item img, .media-item video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .media-item .media-del {
+      position: absolute; top: 6px; right: 6px;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: rgba(70,0,0,0.75);
+      color: #fff;
+      border: none; cursor: pointer;
+      font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .15s;
+    }
+    .media-item:hover .media-del { opacity: 1; }
+    .media-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+      color: #aaa;
+      font-style: italic;
+    }
+    .media-uploading {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      border: 3px dashed #520606;
+      background: #FFF9D6;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      animation: pulse .8s ease-in-out infinite alternate;
+    }
+    @keyframes pulse { from { opacity:.4; } to { opacity:1; } }
     .plant-wobble { animation: pw-wobble .4s ease-in-out; }
     @keyframes pw-wobble {
       0%,100% { transform: rotate(0); }
@@ -325,9 +376,11 @@
       </div>
 
     <article>
-      <div class="avatar-row">
-        <div id="avatar-el" class="avatar"></div>
-        <button class="create" style="font-size:13px; padding:6px 16px;">Change photo</button>
+      <div class="avatar-wrap">
+        <div id="avatar-el" class="avatar" style="display:flex;align-items:center;justify-content:center;font-size:48px;">🎭</div>
+        <input type="file" id="pfp-input" accept="image/*" style="display:none" />
+        <button class="create" style="font-size:13px; padding:6px 16px;" id="pfp-btn">Change photo</button>
+        <p id="pfp-status" style="font-size:11px;color:#460000;text-align:center;min-height:16px;"></p>
       </div>
 
       <div class="profile-body">
@@ -345,16 +398,15 @@
 
     <hr>
 
-    <h2>My Work</h2>
-    <ul class="work-grid">
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-    </ul>
-  </main>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 style="margin-bottom:0;">My Work</h2>
+      <label style="cursor:pointer;">
+        <input type="file" id="media-input" accept="image/*,video/*" multiple style="display:none" />
+        <span class="create" style="font-size:13px;padding:6px 16px;display:inline-block;cursor:pointer;">+ Upload</span>
+      </label>
+    </div>
+    <p id="media-status" style="font-size:11px;color:#460000;margin-bottom:12px;min-height:14px;"></p>
+    <div class="work-grid" id="media-grid"></div>
 
       </div>
   </div>
@@ -393,6 +445,8 @@
   <script>
     const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
+    // Single shared Supabase client — avoids multiple GoTrueClient warnings
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
@@ -470,21 +524,172 @@
         wrap.style.display = 'block';
       }
 
-      // Avatar
-      if (user.picture) {
-        const avatarEl = document.getElementById('avatar-el');
+      // Avatar — handled by setAvatarImg below
+
+      // ── Profile photo upload ──
+      const pfpInput = document.getElementById('pfp-input');
+      const pfpBtn   = document.getElementById('pfp-btn');
+      const pfpStatus = document.getElementById('pfp-status');
+
+      // Load existing PFP from Supabase storage (overrides Auth0 picture)
+      const safeId  = user.sub.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const pfpPath = `${safeId}/pfp`;
+      const { data: pfpUrl } = db
+        .storage.from('pfp')
+        .getPublicUrl(pfpPath);
+      if (pfpUrl?.publicUrl) {
+        // Try to load; if it 404s the onerror will keep the default
+        const testImg = new Image();
+        testImg.onload = () => setAvatarImg(pfpUrl.publicUrl);
+        testImg.src = pfpUrl.publicUrl + '?t=' + Date.now();
+      } else if (user.picture) {
+        setAvatarImg(user.picture);
+      }
+
+      function setAvatarImg(src) {
+        // If already replaced with an <img>, just update src
+        const existing = document.querySelector('img.avatar');
+        if (existing) { existing.src = src; return; }
+        const el = document.getElementById('avatar-el');
+        if (!el) return;
         const img = document.createElement('img');
-        img.src = user.picture;
+        img.src = src;
+        img.id = 'avatar-el';
         img.className = 'avatar';
         img.alt = 'Profile photo';
-        avatarEl.replaceWith(img);
+        img.style.objectFit = 'cover';
+        el.replaceWith(img);
       }
+
+      pfpBtn.addEventListener('click', () => pfpInput.click());
+      pfpInput.addEventListener('change', async () => {
+        const file = pfpInput.files[0];
+        if (!file) return;
+        pfpStatus.textContent = 'Uploading…';
+        pfpBtn.disabled = true;
+        try {
+          const uploadUrl = `${SUPABASE_URL}/storage/v1/object/pfp/${pfpPath}`;
+          const res = await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type': file.type,
+              'x-upsert': 'true',
+            },
+            body: file,
+          });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            pfpStatus.textContent = '⚠️ ' + (json.message || json.error || res.status);
+            return;
+          }
+          const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/pfp/${pfpPath}`;
+          setAvatarImg(publicUrl + '?t=' + Date.now());
+          pfpStatus.textContent = '✓ Photo updated!';
+          setTimeout(() => pfpStatus.textContent = '', 3000);
+        } catch(e) {
+          pfpStatus.textContent = '⚠️ ' + e.message;
+        } finally {
+          pfpBtn.disabled = false;
+        }
+      });
+
+      // ── Media grid ──
+      const mediaGrid   = document.getElementById('media-grid');
+      const mediaInput  = document.getElementById('media-input');
+      const mediaStatus = document.getElementById('media-status');
+      const mediaDb     = db;
+      const MEDIA_BUCKET = 'media';
+      const mediaPrefix  = safeId + '/';
+
+      async function loadMedia() {
+        mediaGrid.innerHTML = '';
+        const { data: files, error } = await mediaDb.storage
+          .from(MEDIA_BUCKET)
+          .list(safeId, { sortBy: { column: 'created_at', order: 'desc' } });
+
+        if (error || !files || files.length === 0) {
+          mediaGrid.innerHTML = '<div class="media-empty">No media yet — upload something!</div>';
+          return;
+        }
+
+        files.forEach(file => {
+          const { data } = mediaDb.storage
+            .from(MEDIA_BUCKET)
+            .getPublicUrl(mediaPrefix + file.name);
+          const url  = data.publicUrl;
+          const isVideo = /\.(mp4|webm|mov|ogg)$/i.test(file.name);
+
+          const wrap = document.createElement('div');
+          wrap.className = 'media-item';
+
+          if (isVideo) {
+            wrap.innerHTML = `<video src="${url}" muted playsinline loop></video>`;
+            wrap.querySelector('video').addEventListener('mouseenter', v => v.target.play());
+            wrap.querySelector('video').addEventListener('mouseleave', v => v.target.pause());
+          } else {
+            wrap.innerHTML = `<img src="${url}" alt="${file.name}" loading="lazy" />`;
+          }
+
+          const del = document.createElement('button');
+          del.className = 'media-del';
+          del.title = 'Remove';
+          del.textContent = '✕';
+          del.addEventListener('click', async () => {
+            del.disabled = true;
+            await mediaDb.storage.from(MEDIA_BUCKET).remove([mediaPrefix + file.name]);
+            wrap.remove();
+            if (!mediaGrid.querySelector('.media-item')) {
+              mediaGrid.innerHTML = '<div class="media-empty">No media yet — upload something!</div>';
+            }
+          });
+          wrap.appendChild(del);
+          mediaGrid.appendChild(wrap);
+        });
+      }
+
+      await loadMedia();
+
+      mediaInput.addEventListener('change', async () => {
+        const files = [...mediaInput.files];
+        if (!files.length) return;
+
+        // Show uploading placeholders
+        const placeholders = files.map(() => {
+          const ph = document.createElement('div');
+          ph.className = 'media-uploading';
+          ph.textContent = '⏳';
+          mediaGrid.prepend(ph);
+          return ph;
+        });
+
+        // Remove empty state if present
+        const empty = mediaGrid.querySelector('.media-empty');
+        if (empty) empty.remove();
+
+        mediaStatus.textContent = `Uploading ${files.length} file${files.length > 1 ? 's' : ''}…`;
+
+        let failed = 0;
+        await Promise.all(files.map(async (file, i) => {
+          const ext  = file.name.split('.').pop();
+          const name = Date.now() + '_' + i + '.' + ext;
+          const { error } = await mediaDb.storage
+            .from(MEDIA_BUCKET)
+            .upload(mediaPrefix + name, file, { contentType: file.type });
+          if (error) { failed++; }
+          placeholders[i].remove();
+        }));
+
+        mediaInput.value = '';
+        if (failed > 0) mediaStatus.textContent = `⚠️ ${failed} file(s) failed to upload.`;
+        else mediaStatus.textContent = '';
+        await loadMedia();
+      });
 
       // ── Plant widget: fetch real application count ──
       let appCount = 0;
       try {
-        const { createClient } = supabase;
-        const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const { data: appRows } = await db
           .from('applications')
           .select('id')
