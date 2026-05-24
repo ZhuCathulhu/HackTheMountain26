@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile – Performr</title>
+  <title>My Listings – Performr</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
@@ -11,7 +11,7 @@
 <body class="page-layout">
 
   <header>
-    <img src="assets/performr.png" alt="Performr logo" />
+    <img src="assets/performr.png" alt="Performr logo" class="logo" />
     <a href="profile.html"></a>
   </header>
 
@@ -19,46 +19,180 @@
     <a href="explore.html">Explore</a>
     <a href="applied.html">Applied</a>
     <a href="listings.html">My Listings</a>
-    <button id="logout-btn">Logout</button>
   </nav>
 
   <main>
     <div class="page-header">
-      <h1>My Profile</h1>
-      <button class="create">Edit Profile</button>
+      <h1>My Listings</h1>
+      <button class="create" id="btn-create">Create a new role +</button>
     </div>
-
-    <article>
-      <div class="avatar-row">
-        <div id="avatar-el" class="avatar"></div>
-        <button class="create" style="font-size:13px; padding:6px 16px;">Change photo</button>
-      </div>
-
-      <div class="profile-body">
-        <h2 id="profile-name"> <small id="profile-email"></small></h2>
-        <p id="profile-location" style="font-size:13px; color:#460000; margin-bottom:8px;"></p>
-        <div class="pills" id="profile-tags"></div>
-        <h3>Bio</h3>
-        <p id="profile-bio"></p>
-        <p id="portfolio-wrap" style="display:none; margin-top:12px;">
-          <a id="portfolio-link" href="#" target="_blank" rel="noopener"
-             style="font-size:13px; font-weight:600; color:#460000;">🔗 Portfolio</a>
-        </p>
-      </div>
-    </article>
-
-    <hr>
-
-    <h2>My Work</h2>
-    <ul class="work-grid">
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
+    <ul class="roles" id="roles-list">
+      <li>Loading…</li>
     </ul>
   </main>
+
+  <!-- Drawer: shell covers the whole viewport via position:fixed -->
+  <div id="drawerShell">
+    <div id="drawerOverlay" onclick="closeDrawer()"></div>
+    <aside id="applicantsDrawer">
+      <div id="drawerHeader">
+        <div>
+          <h2 id="drawerRoleName"></h2>
+          <p id="drawerRoleMeta"></p>
+          <p id="drawerCount"></p>
+        </div>
+        <button id="drawerClose" onclick="closeDrawer()">×</button>
+      </div>
+      <div id="drawerBody"></div>
+    </aside>
+  </div>
+
+  <style>
+    /* ── Drawer shell ── */
+    #drawerShell {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+    }
+    #drawerShell.open { display: block; }
+
+    #drawerOverlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(70,0,0,0.35);
+      cursor: pointer;
+    }
+
+    #applicantsDrawer {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: min(420px, 100vw);
+      background: #FFFEE0;
+      border-left: 2.5px dashed #460000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #drawerHeader {
+      padding: 20px 24px 16px;
+      border-bottom: 2px dashed #460000;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    #drawerRoleName {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #321F1F;
+    }
+
+    #drawerRoleMeta {
+      font-size: 12px;
+      color: #460000;
+      opacity: 0.7;
+    }
+
+    #drawerCount {
+      font-size: 12px;
+      font-weight: 600;
+      color: #460000;
+      margin-top: 4px;
+    }
+
+    #drawerClose {
+      background: none;
+      border: none;
+      font-size: 26px;
+      line-height: 1;
+      cursor: pointer;
+      color: #460000;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    #drawerClose:hover { color: #FF6558; }
+
+    #drawerBody {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── Applicant cards ── */
+    .applicant-card {
+      display: flex;
+      gap: 12px;
+      background: #FFF9D6;
+      border: 2px dashed #460000;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .applicant-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: #FF6558;
+      border: 2px dashed #460000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: #321F1F;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .applicant-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .applicant-info { flex: 1; min-width: 0; }
+    .applicant-name { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: #321F1F; margin-bottom: 2px; }
+    .applicant-sub  { font-size: 12px; color: #460000; opacity: 0.7; margin-bottom: 4px; }
+    .applicant-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+    .applicant-bio  { font-size: 12px; color: #321F1F; opacity: 0.8; margin: 4px 0; line-height: 1.5; }
+
+    .portfolio-link-small { font-size: 12px; color: #460000; font-weight: 600; text-decoration: none; }
+    .portfolio-link-small:hover { text-decoration: underline; }
+
+    .status-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+    .status-badge {
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; border: 1.5px dashed #460000; text-transform: capitalize;
+    }
+    .status-badge.pending  { background: #FFE169; color: #321F1F; }
+    .status-badge.accepted { background: #D1FAE5; color: #2D7A4F; }
+    .status-badge.rejected { background: #FEE2E2; color: #B83232; }
+
+    .action-btns { display: flex; gap: 6px; }
+    .btn-accept, .btn-reject {
+      padding: 4px 12px; font-size: 12px; font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      border-radius: 999px; cursor: pointer;
+      border: 1.5px dashed #460000; transition: opacity 0.15s;
+    }
+    .btn-accept { background: #D1FAE5; color: #2D7A4F; }
+    .btn-reject { background: #FEE2E2; color: #B83232; }
+    .btn-accept:disabled, .btn-reject:disabled { opacity: 0.4; cursor: default; }
+
+    .drawer-empty {
+      text-align: center;
+      padding: 40px 0;
+      color: #460000;
+      opacity: 0.6;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .drawer-empty .icon { font-size: 32px; margin-bottom: 8px; }
+  </style>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -66,18 +200,10 @@
     const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
 
-    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-
-    function addTag(container, text) {
-      if (!text) return;
-      const span = document.createElement('span');
-      span.className = 'on'; // .pills span.on = active pill style
-      span.textContent = cap(text);
-      container.appendChild(span);
-    }
-
     (async () => {
-      const client = await auth0.createAuth0Client({
+      const { createClient } = supabase;
+      window.db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      window.client = await auth0.createAuth0Client({
         domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
         clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
         authorizationParams: { redirect_uri: location.origin, audience: 'https://performr.api' },
@@ -85,73 +211,195 @@
         useRefreshTokens: true,
       });
 
-      if (!(await client.isAuthenticated())) {
+      if (!(await window.client.isAuthenticated())) {
         window.location.href = 'index.html';
         return;
       }
 
-      const user = await client.getUser();
+      const user = await window.client.getUser();
+      window.currentUser = user;
+      const token = await window.client.getTokenSilently();
+      window.db.functions.setAuth(token);
 
-      document.getElementById('logout-btn').addEventListener('click', () => {
-        client.logout({ logoutParams: { returnTo: window.location.origin } });
+      document.getElementById('btn-create').addEventListener('click', () => {
+        window.location.href = 'addList.html';
       });
 
-      // Fetch profile from Supabase
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(user.sub)}&limit=1`,
-        {
-          headers: {
-            'apikey':        SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Accept':        'application/json',
-          }
-        }
-      );
+      const list = document.getElementById('roles-list');
+      list.innerHTML = '';
 
-      const rows = await res.json();
-      const profile = rows?.[0] ?? null;
+      const { data, error } = await window.db
+        .from('roles')
+        .select('*')
+        .eq('created_by', window.currentUser.sub);
 
-      // Name
-      document.getElementById('profile-name').childNodes[0].textContent =
-        (profile?.display_name || user.name || user.email) + ' ';
-
-      // Email shown as subtitle
-      document.getElementById('profile-email').textContent =
-        profile?.email || user.email || '';
-
-      // Location
-      const locEl = document.getElementById('profile-location');
-      if (profile?.location) locEl.textContent = '📍 ' + profile.location;
-
-      // Tags
-      const tagsEl = document.getElementById('profile-tags');
-      if (profile?.discipline_detail) addTag(tagsEl, profile.discipline_detail);
-      else if (profile?.discipline)   addTag(tagsEl, profile.discipline);
-      if (profile?.role)     addTag(tagsEl, profile.role);
-      if (profile?.org_user) addTag(tagsEl, profile.org_user);
-
-      // Bio
-      const bioEl = document.getElementById('profile-bio');
-      if (profile?.bio) bioEl.textContent = profile.bio;
-
-      // Portfolio
-      if (profile?.portfolio_url) {
-        const wrap = document.getElementById('portfolio-wrap');
-        const link = document.getElementById('portfolio-link');
-        link.href = profile.portfolio_url;
-        wrap.style.display = 'block';
+      if (error) {
+        console.error('Supabase error:', error.message, error.hint);
+        list.innerHTML = '<li>Failed to load listings.</li>';
+        return;
       }
 
-      // Avatar
-      if (user.picture) {
-        const avatarEl = document.getElementById('avatar-el');
-        const img = document.createElement('img');
-        img.src = user.picture;
-        img.className = 'avatar';
-        img.alt = 'Profile photo';
-        avatarEl.replaceWith(img);
+      if (!data || data.length === 0) {
+        list.innerHTML = '<li>No listings yet. Create one above!</li>';
+        return;
       }
+
+      const roleIds = data.map(r => r.id);
+      const { data: countData } = await window.db
+        .from('applications')
+        .select('role_id')
+        .in('role_id', roleIds);
+
+      const countMap = {};
+      (countData || []).forEach(row => {
+        countMap[row.role_id] = (countMap[row.role_id] || 0) + 1;
+      });
+
+      data.forEach(role => {
+        const count = countMap[role.id] || 0;
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <h2>${role.name ?? '—'}</h2>
+          <p>${role.addr ? role.addr + ', ' : ''}${role.city ?? ''}</p>
+          <footer>
+            ${role.genre    ? `<span>${role.genre}</span>`    : ''}
+            ${role.level    ? `<span>${role.level}</span>`    : ''}
+            ${role.location ? `<span>${role.location}</span>` : ''}
+            ${role.uniform  ? `<span>${role.uniform}</span>`  : ''}
+          </footer>
+          <p class="status">👥 ${count} applicant${count !== 1 ? 's' : ''}</p>
+        `;
+        li.addEventListener('click', () => openDrawer(role));
+        list.appendChild(li);
+      });
     })();
+
+    // ── Drawer ──
+    function openDrawer(role) {
+      document.getElementById('drawerRoleName').textContent = role.name ?? '—';
+      document.getElementById('drawerRoleMeta').textContent =
+        [role.genre, role.level, role.city].filter(Boolean).join(' · ');
+      document.getElementById('drawerCount').textContent = '';
+      document.getElementById('drawerBody').innerHTML =
+        '<div class="drawer-empty">Loading applicants…</div>';
+
+      document.getElementById('drawerShell').classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      loadApplicants(role.id);
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawerShell').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+    async function loadApplicants(roleId) {
+      const { data, error } = await window.db
+        .from('applications')
+        .select('*, profiles(*)')
+        .eq('role_id', roleId)
+        .order('created_at', { ascending: false });
+
+      const body    = document.getElementById('drawerBody');
+      const countEl = document.getElementById('drawerCount');
+
+      if (error) {
+        body.innerHTML = `<div class="drawer-empty"><div class="icon">⚠️</div>Failed to load applicants.</div>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        countEl.textContent = '0 applicants';
+        body.innerHTML = `
+          <div class="drawer-empty">
+            <div class="icon">🎭</div>
+            No one has applied yet.<br>Share this role to find performers!
+          </div>`;
+        return;
+      }
+
+      countEl.textContent = `${data.length} applicant${data.length !== 1 ? 's' : ''}`;
+      body.innerHTML = '';
+
+      data.forEach(app => {
+        const profile = app.profiles;
+        const displayName = profile?.display_name || profile?.email || 'Unknown performer';
+        const initial = displayName.charAt(0).toUpperCase();
+        const statusClass = ['pending','accepted','rejected'].includes(app.status) ? app.status : 'pending';
+        const isPending = app.status === 'pending';
+
+        const avatarHtml = profile?.avatar_url
+          ? `<div class="applicant-avatar"><img src="${profile.avatar_url}" alt="${displayName}" /></div>`
+          : `<div class="applicant-avatar">${initial}</div>`;
+
+        const subParts = [];
+        if (profile?.discipline_detail) subParts.push(profile.discipline_detail);
+        else if (profile?.discipline)   subParts.push(profile.discipline);
+        if (profile?.location)          subParts.push('📍 ' + profile.location);
+
+        const tagsHtml = [profile?.role, profile?.org_user]
+          .filter(Boolean)
+          .map(t => `<span class="tag-pill" style="font-size:11px;">${t}</span>`)
+          .join('');
+
+        const portfolioHtml = profile?.portfolio_url
+          ? `<a class="portfolio-link-small" href="${profile.portfolio_url}" target="_blank" rel="noopener">🔗 Portfolio</a>`
+          : '';
+
+        const card = document.createElement('div');
+        card.className = 'applicant-card';
+        card.dataset.appId = app.id;
+        card.innerHTML = `
+          ${avatarHtml}
+          <div class="applicant-info">
+            <div class="applicant-name">${displayName}</div>
+            <div class="applicant-sub">${subParts.join(' · ')}</div>
+            ${tagsHtml ? `<div class="applicant-tags">${tagsHtml}</div>` : ''}
+            ${profile?.bio ? `<div class="applicant-bio">${profile.bio}</div>` : ''}
+            ${portfolioHtml}
+            <div class="status-row">
+              <span class="status-badge ${statusClass}" id="badge-${app.id}">${app.status}</span>
+              <div class="action-btns">
+                <button class="btn-accept" id="accept-${app.id}"
+                  onclick="updateStatus('${app.id}', 'accepted')"
+                  ${!isPending ? 'disabled' : ''}>✓ Accept</button>
+                <button class="btn-reject" id="reject-${app.id}"
+                  onclick="updateStatus('${app.id}', 'rejected')"
+                  ${!isPending ? 'disabled' : ''}>✕ Reject</button>
+              </div>
+            </div>
+          </div>
+        `;
+        body.appendChild(card);
+      });
+    }
+
+    async function updateStatus(appId, newStatus) {
+      const acceptBtn = document.getElementById(`accept-${appId}`);
+      const rejectBtn = document.getElementById(`reject-${appId}`);
+      const badge     = document.getElementById(`badge-${appId}`);
+
+      acceptBtn.disabled = true;
+      rejectBtn.disabled = true;
+
+      const { error } = await window.db
+        .from('applications')
+        .update({ status: newStatus })
+        .eq('id', appId);
+
+      if (error) {
+        alert('Failed to update status: ' + error.message);
+        acceptBtn.disabled = false;
+        rejectBtn.disabled = false;
+        return;
+      }
+
+      badge.textContent = newStatus;
+      badge.className = `status-badge ${newStatus}`;
+    }
   </script>
 </body>
 </html>
