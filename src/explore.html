@@ -209,6 +209,7 @@ map.on('contextmenu', async (e) => {
   roles.push(role);
 
   const { data, error } = await window.db.from('roles').insert([{
+    id: role.id,
     name: role.name,
     addr: role.addr,
     city: role.city,
@@ -387,7 +388,7 @@ async function loadRoles() {
     const { createClient } = supabase;
     window.db = createClient(
       'https://golijzcjitljymhpjaur.supabase.co',
-      'sb_publishable_MdfsZkfCS5aoZeu0pEZTYg_AKRSd0zg'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk'
     );
 
     //Init Auth0
