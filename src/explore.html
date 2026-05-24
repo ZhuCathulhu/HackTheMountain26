@@ -366,32 +366,14 @@ async function loadRoles() {
 <!--For Supabase Database-->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+<script src="auth.js"></script>
 <script>
   (async () => {
-    //Init Supabase
-    const { createClient } = supabase;
-    window.db = createClient(
-      'https://golijzcjitljymhpjaur.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk'
-    );
+    if (!await initApp()) return;
 
-    //Init Auth0
-    window.client = await auth0.createAuth0Client({
-      domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
-      clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-      authorizationParams: { redirect_uri: location.origin },
-    });
-
-    if (!(await window.client.isAuthenticated())) {
-      window.location.href = 'index.html';
-      return;
-    }
-
-    const user = await window.client.getUser();
-    //document.getElementById('user-email').textContent = user.email;
-    window.currentUser = user;
-    const token = await window.client.getTokenSilently();
-    window.db.functions.setAuth(token);
+    // explore-specific logic
     loadRoles();
   })();
 </script>

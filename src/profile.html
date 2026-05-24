@@ -195,19 +195,12 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+<script src="auth.js"></script>
 <script>
   (async () => {
-    window.client = await auth0.createAuth0Client({
-      domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
-      clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-      authorizationParams: { redirect_uri: location.origin }
-    });
-
-    // Redirect to login if not authenticated
-    if (!(await window.client.isAuthenticated())) {
-      window.location.href = 'index.html';
-      return;
-    }
+    if (!await initApp()) return;
 
     document.getElementById('logout-btn').addEventListener('click', () => {
       window.client.logout({ logoutParams: { returnTo: window.location.origin } });

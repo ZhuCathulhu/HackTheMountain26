@@ -23,36 +23,6 @@
     <a href="listings.html"  class="tab-listings">My Listings</a>
   </div>
 
-  <!--<main class="page">
-    <div class="section-header">
-      <h1>My Listings</h1>
-      <button class="btn-create">Create a new role +</button>
-    </div>
-
-    <div class="roles-grid">
-    -->
-      <!-- Populated card -->
-      <!--<div class="role-card">
-        <h2>Tap Dancer</h2>
-        <p class="card-address">123 ave Green</p>
-        <div class="card-tags">
-          <span class="tag-pill">Pianist</span>
-          <span class="tag-pill">Intermediate</span>
-        </div>
-        <p class="card-desc">
-          Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-          Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
-          when an unknown printer took a galley of type.
-        </p>
-      </div>
-    -->
-      <!-- Empty cards
-      <div class="role-card empty"></div>
-      <div class="role-card empty"></div>
-      <div class="role-card empty"></div>
-      <div class="role-card empty"></div>
-      <div class="role-card empty"></div>
-    -->
 
     <main class="page">
     <div class="section-header">
@@ -87,127 +57,107 @@
   </div>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    (async () => {
-      const { createClient } = supabase;
-      window.db = createClient(
-        'https://golijzcjitljymhpjaur.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk'
-      );
-      window.client = await auth0.createAuth0Client({
-        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
-        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-        authorizationParams: { redirect_uri: location.origin },
-      });
- 
-      if (!(await window.client.isAuthenticated())) {
-        window.location.href = 'index.html';
-        return;
-      }
- 
-      const user = await window.client.getUser();
-      window.currentUser = user;
-      const token = await window.client.getTokenSilently();
-      window.db.functions.setAuth(token);
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script>
+  (async () => {
+    if (!await initApp()) return;
 
-      // Wire up button immediately after auth — not dependent on data loading
-      document.querySelector('.btn-create').addEventListener('click', () => {
-        window.location.href = 'addList.html';
-      });
+    document.querySelector('.btn-create').addEventListener('click', () => {
+      window.location.href = 'addList.html';
+    });
 
-      const { data, error } = await window.db
-        .from('roles')
-        .select('*')
-        .eq('created_by', user.sub);
- 
-      const grid = document.getElementById('roles-grid');
-      grid.innerHTML = '';
- 
-      if (error) {
-        console.error('Supabase error:', error.message, error.hint);
-        grid.innerHTML = '<p>Failed to load listings.</p>';
-        return;
-      }
- 
-      if (!data || data.length === 0) {
-        grid.innerHTML = '<p>No listings yet. Create one above!</p>';
-        return;
-      }
- 
-      data.forEach(role => {
-        const card = document.createElement('div');
-        card.className = 'role-card';
-        card.innerHTML = `
-          <h2>${role.name}</h2>
-          <p class="card-address">${role.addr ? role.addr + ', ' : ''}${role.city}</p>
-          <div class="card-tags">
-            <span class="tag-pill">${role.genre}</span>
-            <span class="tag-pill">${role.level}</span>
-            <span class="tag-pill">${role.location}</span>
-            <span class="tag-pill">${role.uniform}</span>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    })();
+    const { data, error } = await window.db
+      .from('roles')
+      .select('*')
+      .eq('created_by', window.currentUser.sub);
 
-    function openModal() {
-      document.getElementById('createRoleModal').style.display = 'flex';
+    const grid = document.getElementById('roles-grid');
+    grid.innerHTML = '';
+
+    if (error) {
+      console.error('Supabase error:', error.message, error.hint);
+      grid.innerHTML = '<p>Failed to load listings.</p>';
+      return;
     }
 
-    function closeModal() {
-      document.getElementById('createRoleModal').style.display = 'none';
-      document.getElementById('modalError').style.display = 'none';
+    if (!data || data.length === 0) {
+      grid.innerHTML = '<p>No listings yet. Create one above!</p>';
+      return;
     }
 
-    async function submitRole() {
-      const name = document.getElementById('roleName').value.trim();
-      if (!name) {
-        const err = document.getElementById('modalError');
-        err.textContent = 'Role name is required.';
-        err.style.display = 'block';
-        return;
-      }
+    data.forEach(role => {
+      const card = document.createElement('div');
+      card.className = 'role-card';
+      card.innerHTML = `
+        <h2>${role.name}</h2>
+        <p class="card-address">${role.addr ? role.addr + ', ' : ''}${role.city}</p>
+        <div class="card-tags">
+          <span class="tag-pill">${role.genre}</span>
+          <span class="tag-pill">${role.level}</span>
+          <span class="tag-pill">${role.location}</span>
+          <span class="tag-pill">${role.uniform}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  })();
 
-      const token = await window.client.getTokenSilently();
-      const user  = window.currentUser;
+  function openModal() {
+    document.getElementById('createRoleModal').style.display = 'flex';
+  }
 
-      const payload = {
-        name,
-        genre:      document.getElementById('roleGenre').value.trim(),
-        level:      document.getElementById('roleLevel').value.trim(),
-        addr:       document.getElementById('roleAddr').value.trim(),
-        city:       document.getElementById('roleCity').value.trim(),
-        location:   document.getElementById('roleLocation').value.trim(),
-        uniform:    document.getElementById('roleUniform').value.trim(),
-        created_by: user.sub,
-      };
+  function closeModal() {
+    document.getElementById('createRoleModal').style.display = 'none';
+    document.getElementById('modalError').style.display = 'none';
+  }
 
-      const res = await fetch('https://golijzcjitljymhpjaur.supabase.co/rest/v1/roles', {
-        method: 'POST',
-        headers: {
-          'apikey':        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type':  'application/json',
-          'Prefer':        'return=representation',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        closeModal();
-        ['roleName','roleGenre','roleLevel','roleAddr','roleCity','roleLocation','roleUniform']
-          .forEach(id => document.getElementById(id).value = '');
-        location.reload();
-      } else {
-        const errData = await res.json();
-        const err = document.getElementById('modalError');
-        err.textContent = 'Error: ' + (errData.message ?? JSON.stringify(errData));
-        err.style.display = 'block';
-      }
+  async function submitRole() {
+    const name = document.getElementById('roleName').value.trim();
+    if (!name) {
+      const err = document.getElementById('modalError');
+      err.textContent = 'Role name is required.';
+      err.style.display = 'block';
+      return;
     }
-  </script>
+
+    const token = await window.client.getTokenSilently();
+
+    const payload = {
+      name,
+      genre:      document.getElementById('roleGenre').value.trim(),
+      level:      document.getElementById('roleLevel').value.trim(),
+      addr:       document.getElementById('roleAddr').value.trim(),
+      city:       document.getElementById('roleCity').value.trim(),
+      location:   document.getElementById('roleLocation').value.trim(),
+      uniform:    document.getElementById('roleUniform').value.trim(),
+      created_by: window.currentUser.sub,
+    };
+
+    const res = await fetch('https://golijzcjitljymhpjaur.supabase.co/rest/v1/roles', {
+      method: 'POST',
+      headers: {
+        'apikey':        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk',
+        'Authorization': `Bearer ${token}`,
+        'Content-Type':  'application/json',
+        'Prefer':        'return=representation',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      closeModal();
+      ['roleName','roleGenre','roleLevel','roleAddr','roleCity','roleLocation','roleUniform']
+        .forEach(id => document.getElementById(id).value = '');
+      location.reload();
+    } else {
+      const errData = await res.json();
+      const err = document.getElementById('modalError');
+      err.textContent = 'Error: ' + (errData.message ?? JSON.stringify(errData));
+      err.style.display = 'block';
+    }
+  }
+</script>
 
 </body>
 </html>
