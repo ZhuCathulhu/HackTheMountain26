@@ -20,6 +20,8 @@
   "homepage": "https://github.com/ZhuCathulhu/HackTheMountain26#readme",
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.20.0",
+    "axios": "^1.16.1",
+    "cors": "^2.8.6",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3"
   }
