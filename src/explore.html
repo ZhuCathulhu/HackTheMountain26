@@ -185,7 +185,24 @@ map.on('contextmenu', (e) => {
     lat, lng,
   };
   roles.push(role);
-  addRoleMarker(role);
+
+  const { data, error } = await window.db.from('roles').insert([{
+    id: role.id,
+    name: role.name,
+    addr: role.addr,
+    city: role.city,
+    genre: role.genre,
+    level: role.level,
+    location: role.location,
+    uniform: role.uniform,
+    lat: role.lat,
+    lng: role.lng,
+    created_by: (await window.client.getUser()).sub,
+  }]).select().single();
+
+  if (!error) role.id = data.id;
+
+  addRoleMarker(role);                       // existing lines below
   showHint();
   render();
   selectRole(id);
@@ -318,7 +335,47 @@ document.getElementById('search').addEventListener('input', (e) => {
   render();
 });
 
-render();
+/* ── Init ── */
+async function loadRoles() {
+  const { data, error } = await window.db.from('roles').select('*');
+  if (error) { console.error(error); return; }
+  roles = data;
+  nextId = Math.max(...roles.map(r => r.id), 5) + 1;
+  render();
+}
+</script>
+
+<!--SDKs first, then init-->
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+<!--For Supabase Database-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  (async () => {
+    //Init Supabase
+    const { createClient } = supabase;
+    window.db = createClient(
+      'https://golijzcjitljymhpjaur.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk'
+    );
+
+    //Init Auth0
+    window.client = await auth0.createAuth0Client({
+      domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+      clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+      authorizationParams: { redirect_uri: location.origin },
+    });
+
+    if (!(await window.client.isAuthenticated())) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const user = await window.client.getUser();
+    document.getElementById('user-email').textContent = user.email;
+  
+    loadRoles();
+  })();
 </script>
 </body>
 </html>
