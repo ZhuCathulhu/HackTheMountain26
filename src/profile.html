@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile – Performr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-layout">
+
+  <header>
+    <img src="assets/performr.png" alt="Performr logo" />
+    <a href="profile.html"></a>
+  </header>
+
+  <nav>
+    <a href="explore.html">Explore</a>
+    <a href="applied.html">Applied</a>
+    <a href="listings.html">My Listings</a>
+    <button id="logout-btn">Logout</button>
+  </nav>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--page-bg); font-family: var(--font); }
+    .page {
+      padding: 32px 20px 60px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .profile-container {
+      background: #fff9e7;
+      border-radius: 18px;
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 780px;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .profile-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .btn-edit {
+      background: #1A0A0A;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 26px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+    .btn-edit:hover { background: #3a1a1a; }
+    .profile-info {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 32px;
+      align-items: flex-start;
+    }
+    .avatar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 180px;
+      height: 200px;
+      border-radius: 12px;
+      border-style: dashed;
+      border-width: 3px;
+      border-color: #520606;
+      background: #FFA958;
+      object-fit: cover;
+    }
+    .change-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--brand);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font);
+    }
+    .profile-details { flex: 1; }
+    .profile-name {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.4px;
+      margin-bottom: 4px;
+    }
+    .profile-email {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .profile-location {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .bio-label {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .bio-text {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #2a1a14;
+    }
+    .bio-empty {
+      font-size: 14px;
+      color: #aaa;
+      font-style: italic;
+    }
+    .divider {
+      border: none;
+      border-top: 1.5px solid var(--border);
+      margin: 24px 0;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .work-thumb {
+      aspect-ratio: 1;
+      background: #FFA958;
+      border-radius: 10px;
+      border-style: dashed;
+      border-width: 3px;
+      border-color: #520606;
+    }
+    .profile-skeleton {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .portfolio-link {
+      display: inline-block;
+      font-size: 13px;
+      color: #520606;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .portfolio-link:hover { text-decoration: underline; }
+
+    /* ── Plant Widget ── */
+    .plant-widget {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0;
+    }
+    .plant-bubble {
+      background: #320303;
+      color: #FFE169;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      letter-spacing: -.01em;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+    }
+    .plant-bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .plant-toggle {
+      background: #FAFAE8;
+      border: 2px dashed #460000;
+      border-radius: 20px;
+      padding: 10px 14px 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: transform .2s, background .15s;
+      position: relative;
+    }
+    .plant-toggle:hover { background: #F5ECD5; transform: scale(1.05); }
+    .plant-toggle:hover .plant-bubble { opacity: 1; transform: translateY(0); }
+    .plant-count-badge {
+      background: #320303;
+      color: #FFE169;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: .02em;
+    }
+
+    /* Plant drawer */
+    .plant-drawer {
+      position: fixed;
+      bottom: 0; right: 0;
+      width: 340px;
+      background: #F5ECD5;
+      border: 2px dashed #460000;
+      border-bottom: none;
+      border-right: none;
+      border-radius: 20px 0 0 0;
+      z-index: 600;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+      padding: 20px 20px 28px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .plant-drawer.open { transform: translateY(0); }
+    .plant-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .plant-drawer-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #460000;
+    }
+    .plant-drawer-close {
+      background: #320303;
+      border: none;
+      border-radius: 50%;
+      width: 28px; height: 28px;
+      color: #FFE169;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .plant-stage-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .plant-svg-wrap { flex-shrink: 0; }
+    .plant-text { flex: 1; }
+    .plant-stage-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1A0A0A;
+      margin-bottom: 4px;
+      letter-spacing: -.3px;
+    }
+    .plant-stage-desc {
+      font-size: 12px;
+      color: #5a3a1a;
+      line-height: 1.5;
+    }
+    .plant-progress-track {
+      height: 6px;
+      background: #e8d4b0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 5px;
+    }
+    .plant-progress-bar {
+      height: 100%;
+      background: #2D7A4F;
+      border-radius: 999px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+    .plant-progress-label {
+      font-size: 11px;
+      color: #8a6a3a;
+      font-weight: 600;
+    }
+
+    /* ── Media grid ── */
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .media-item {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      border: 3px dashed #520606;
+      overflow: hidden;
+      position: relative;
+      background: #FFA958;
+    }
+    .media-item img, .media-item video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .media-item .media-del {
+      position: absolute; top: 6px; right: 6px;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: rgba(70,0,0,0.75);
+      color: #fff;
+      border: none; cursor: pointer;
+      font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .15s;
+    }
+    .media-item:hover .media-del { opacity: 1; }
+    .media-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+      color: #aaa;
+      font-style: italic;
+    }
+    .media-uploading {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      border: 3px dashed #520606;
+      background: #FFF9D6;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      animation: pulse .8s ease-in-out infinite alternate;
+    }
+    @keyframes pulse { from { opacity:.4; } to { opacity:1; } }
+    .plant-wobble { animation: pw-wobble .4s ease-in-out; }
+    @keyframes pw-wobble {
+      0%,100% { transform: rotate(0); }
+      25% { transform: rotate(-7deg); }
+      75% { transform: rotate(7deg); }
+    }
+  </style>
+
+  <div class="page">
+    <div class="profile-container" id="profile-container">
+
+      <div class="profile-header">
+        <h1>My Profile</h1>
+        <button class="btn-edit">Edit Profile</button>
+      </div>
+
+    <article>
+      <div class="avatar-wrap">
+        <div id="avatar-el" class="avatar" style="display:flex;align-items:center;justify-content:center;font-size:48px;">🎭</div>
+        <input type="file" id="pfp-input" accept="image/*" style="display:none" />
+        <button class="create" style="font-size:13px; padding:6px 16px;" id="pfp-btn">Change photo</button>
+        <p id="pfp-status" style="font-size:11px;color:#460000;text-align:center;min-height:16px;"></p>
+      </div>
+
+      <div class="profile-body">
+        <h2 id="profile-name"> <small id="profile-email"></small></h2>
+        <p id="profile-location" style="font-size:13px; color:#460000; margin-bottom:8px;"></p>
+        <div class="pills" id="profile-tags"></div>
+        <h3>Bio</h3>
+        <p id="profile-bio"></p>
+        <p id="portfolio-wrap" style="display:none; margin-top:12px;">
+          <a id="portfolio-link" href="#" target="_blank" rel="noopener"
+             style="font-size:13px; font-weight:600; color:#460000;">🔗 Portfolio</a>
+        </p>
+      </div>
+    </article>
+
+    <hr>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 style="margin-bottom:0;">My Work</h2>
+      <label style="cursor:pointer;">
+        <input type="file" id="media-input" accept="image/*,video/*" multiple style="display:none" />
+        <span class="create" style="font-size:13px;padding:6px 16px;display:inline-block;cursor:pointer;">+ Upload</span>
+      </label>
+    </div>
+    <p id="media-status" style="font-size:11px;color:#460000;margin-bottom:12px;min-height:14px;"></p>
+    <div class="work-grid" id="media-grid"></div>
+
+      </div>
+  </div>
+
+  <!-- ── Plant Widget ── -->
+  <div class="plant-widget" id="plantWidget" style="display:none">
+    <div class="plant-bubble" id="plantBubble">your garden 🌱</div>
+    <div class="plant-toggle" id="plantToggle" onclick="togglePlantDrawer()">
+      <svg id="plantMiniSvg" width="56" height="64" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="plant-count-badge" id="plantCountBadge">0 applied</div>
+    </div>
+  </div>
+
+  <div class="plant-drawer" id="plantDrawer">
+    <div class="plant-drawer-header">
+      <span class="plant-drawer-title">your performr garden</span>
+      <button class="plant-drawer-close" onclick="togglePlantDrawer()">✕</button>
+    </div>
+    <div class="plant-stage-row">
+      <div class="plant-svg-wrap">
+        <svg id="plantMainSvg" width="100" height="120" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="plant-text">
+        <div class="plant-stage-name" id="plantStageName">A blank pot</div>
+        <div class="plant-stage-desc" id="plantStageDesc">Nothing's growing yet. Your plant is judging you silently.</div>
+      </div>
+    </div>
+    <div class="plant-progress-track">
+      <div class="plant-progress-bar" id="plantBar" style="width:0%"></div>
+    </div>
+    <div class="plant-progress-label" id="plantProgressLabel">Apply to a role to wake it up</div>
+  </div>
+
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
+    // Single shared Supabase client — avoids multiple GoTrueClient warnings
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+    function addTag(container, text) {
+      if (!text) return;
+      const span = document.createElement('span');
+      span.className = 'on'; // .pills span.on = active pill style
+      span.textContent = cap(text);
+      container.appendChild(span);
+    }
+
+    (async () => {
+      const client = await auth0.createAuth0Client({
+        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+        authorizationParams: { redirect_uri: location.origin, audience: 'https://performr.api' },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
+      });
+
+      if (!(await client.isAuthenticated())) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const user = await client.getUser();
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        client.logout({ logoutParams: { returnTo: window.location.origin } });
+      });
+
+      // Fetch profile from Supabase
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(user.sub)}&limit=1`,
+        {
+          headers: {
+            'apikey':        SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Accept':        'application/json',
+          }
+        }
+      );
+
+      const rows = await res.json();
+      const profile = rows?.[0] ?? null;
+
+      // Name
+      document.getElementById('profile-name').childNodes[0].textContent =
+        (profile?.display_name || user.name || user.email) + ' ';
+
+      // Email shown as subtitle
+      document.getElementById('profile-email').textContent =
+        profile?.email || user.email || '';
+
+      // Location
+      const locEl = document.getElementById('profile-location');
+      if (profile?.location) locEl.textContent = '📍 ' + profile.location;
+
+      // Tags
+      const tagsEl = document.getElementById('profile-tags');
+      if (profile?.discipline_detail) addTag(tagsEl, profile.discipline_detail);
+      else if (profile?.discipline)   addTag(tagsEl, profile.discipline);
+      if (profile?.role)     addTag(tagsEl, profile.role);
+      if (profile?.org_user) addTag(tagsEl, profile.org_user);
+
+      // Bio
+      const bioEl = document.getElementById('profile-bio');
+      if (profile?.bio) bioEl.textContent = profile.bio;
+
+      // Portfolio
+      if (profile?.portfolio_url) {
+        const wrap = document.getElementById('portfolio-wrap');
+        const link = document.getElementById('portfolio-link');
+        link.href = profile.portfolio_url;
+        wrap.style.display = 'block';
+      }
+
+      // Avatar — handled by setAvatarImg below
+
+      // ── Profile photo upload ──
+      const pfpInput = document.getElementById('pfp-input');
+      const pfpBtn   = document.getElementById('pfp-btn');
+      const pfpStatus = document.getElementById('pfp-status');
+
+      // Load existing PFP from Supabase storage (overrides Auth0 picture)
+      const safeId  = user.sub.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const pfpPath = `${safeId}/pfp`;
+      const { data: pfpUrl } = db
+        .storage.from('pfp')
+        .getPublicUrl(pfpPath);
+      if (pfpUrl?.publicUrl) {
+        // Try to load; if it 404s the onerror will keep the default
+        const testImg = new Image();
+        testImg.onload = () => setAvatarImg(pfpUrl.publicUrl);
+        testImg.src = pfpUrl.publicUrl + '?t=' + Date.now();
+      } else if (user.picture) {
+        setAvatarImg(user.picture);
+      }
+
+      function setAvatarImg(src) {
+        // If already replaced with an <img>, just update src
+        const existing = document.querySelector('img.avatar');
+        if (existing) { existing.src = src; return; }
+        const el = document.getElementById('avatar-el');
+        if (!el) return;
+        const img = document.createElement('img');
+        img.src = src;
+        img.id = 'avatar-el';
+        img.className = 'avatar';
+        img.alt = 'Profile photo';
+        img.style.objectFit = 'cover';
+        el.replaceWith(img);
+      }
+
+      pfpBtn.addEventListener('click', () => pfpInput.click());
+      pfpInput.addEventListener('change', async () => {
+        const file = pfpInput.files[0];
+        if (!file) return;
+        pfpStatus.textContent = 'Uploading…';
+        pfpBtn.disabled = true;
+        try {
+          const uploadUrl = `${SUPABASE_URL}/storage/v1/object/pfp/${pfpPath}`;
+          const res = await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type': file.type,
+              'x-upsert': 'true',
+            },
+            body: file,
+          });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            pfpStatus.textContent = '⚠️ ' + (json.message || json.error || res.status);
+            return;
+          }
+          const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/pfp/${pfpPath}`;
+          setAvatarImg(publicUrl + '?t=' + Date.now());
+          pfpStatus.textContent = '✓ Photo updated!';
+          setTimeout(() => pfpStatus.textContent = '', 3000);
+        } catch(e) {
+          pfpStatus.textContent = '⚠️ ' + e.message;
+        } finally {
+          pfpBtn.disabled = false;
+        }
+      });
+
+      // ── Media grid ──
+      const mediaGrid   = document.getElementById('media-grid');
+      const mediaInput  = document.getElementById('media-input');
+      const mediaStatus = document.getElementById('media-status');
+      const mediaDb     = db;
+      const MEDIA_BUCKET = 'media';
+      const mediaPrefix  = safeId + '/';
+
+      async function loadMedia() {
+        mediaGrid.innerHTML = '';
+        const { data: files, error } = await mediaDb.storage
+          .from(MEDIA_BUCKET)
+          .list(safeId, { sortBy: { column: 'created_at', order: 'desc' } });
+
+        if (error || !files || files.length === 0) {
+          mediaGrid.innerHTML = '<div class="media-empty">No media yet — upload something!</div>';
+          return;
+        }
+
+        files.forEach(file => {
+          const { data } = mediaDb.storage
+            .from(MEDIA_BUCKET)
+            .getPublicUrl(mediaPrefix + file.name);
+          const url  = data.publicUrl;
+          const isVideo = /\.(mp4|webm|mov|ogg)$/i.test(file.name);
+
+          const wrap = document.createElement('div');
+          wrap.className = 'media-item';
+
+          if (isVideo) {
+            wrap.innerHTML = `<video src="${url}" muted playsinline loop></video>`;
+            wrap.querySelector('video').addEventListener('mouseenter', v => v.target.play());
+            wrap.querySelector('video').addEventListener('mouseleave', v => v.target.pause());
+          } else {
+            wrap.innerHTML = `<img src="${url}" alt="${file.name}" loading="lazy" />`;
+          }
+
+          const del = document.createElement('button');
+          del.className = 'media-del';
+          del.title = 'Remove';
+          del.textContent = '✕';
+          del.addEventListener('click', async () => {
+            del.disabled = true;
+            await mediaDb.storage.from(MEDIA_BUCKET).remove([mediaPrefix + file.name]);
+            wrap.remove();
+            if (!mediaGrid.querySelector('.media-item')) {
+              mediaGrid.innerHTML = '<div class="media-empty">No media yet — upload something!</div>';
+            }
+          });
+          wrap.appendChild(del);
+          mediaGrid.appendChild(wrap);
+        });
+      }
+
+      await loadMedia();
+
+      mediaInput.addEventListener('change', async () => {
+        const files = [...mediaInput.files];
+        if (!files.length) return;
+
+        // Show uploading placeholders
+        const placeholders = files.map(() => {
+          const ph = document.createElement('div');
+          ph.className = 'media-uploading';
+          ph.textContent = '⏳';
+          mediaGrid.prepend(ph);
+          return ph;
+        });
+
+        // Remove empty state if present
+        const empty = mediaGrid.querySelector('.media-empty');
+        if (empty) empty.remove();
+
+        mediaStatus.textContent = `Uploading ${files.length} file${files.length > 1 ? 's' : ''}…`;
+
+        let failed = 0;
+        await Promise.all(files.map(async (file, i) => {
+          const ext  = file.name.split('.').pop();
+          const name = Date.now() + '_' + i + '.' + ext;
+          const { error } = await mediaDb.storage
+            .from(MEDIA_BUCKET)
+            .upload(mediaPrefix + name, file, { contentType: file.type });
+          if (error) { failed++; }
+          placeholders[i].remove();
+        }));
+
+        mediaInput.value = '';
+        if (failed > 0) mediaStatus.textContent = `⚠️ ${failed} file(s) failed to upload.`;
+        else mediaStatus.textContent = '';
+        await loadMedia();
+      });
+
+      // ── Plant widget: fetch real application count ──
+      let appCount = 0;
+      try {
+        const { data: appRows } = await db
+          .from('applications')
+          .select('id')
+          .eq('applicant_id', user.sub);
+        appCount = appRows ? appRows.length : 0;
+      } catch(e) {
+        console.warn('Plant count fetch failed:', e);
+      }
+      initPlantWidget(appCount);
+    })();
+
+    // ── Plant widget logic ──
+    const PLANT_STAGES = [
+      { min:0,  max:0,  name:'A blank pot',       desc:'Nothing\'s growing yet. Your plant is judging you silently.',      next:'Apply once to wake it up' },
+      { min:1,  max:2,  name:'A tiny sprout',      desc:'It\'s alive! Barely. It\'s looking at you like you might abandon it.', next:'{left} more to grow leaves' },
+      { min:3,  max:5,  name:'Getting weird',       desc:'It\'s developing a face. This is normal. Don\'t worry about it.',  next:'{left} more until full chaos' },
+      { min:6,  max:9,  name:'Full send mode',      desc:'It\'s vibrating. It knows things. It believes in you aggressively.', next:'{left} more to achieve nirvana' },
+      { min:10, max:14, name:'Enlightened shrub',   desc:'Your plant has transcended. It\'s writing your name on a mood board.', next:'{left} more to unlock final form' },
+      { min:15, max:99, name:'THE FINAL PLANT',     desc:'This is it. Peak performance. Your plant is you. You are the plant.', next:'Maximum unhinged. Respect.' },
+    ];
+
+    function getStage(n) {
+      return PLANT_STAGES.find(s => n >= s.min && n <= s.max) || PLANT_STAGES[PLANT_STAGES.length-1];
+    }
+
+    function drawPlantSvg(svgEl, n, scale) {
+      // scale: 1 = full (100x120 viewBox), 0.56 = mini (56x64 viewBox)
+      const W = 100, H = 120;
+      const ns = 'http://www.w3.org/2000/svg';
+      svgEl.innerHTML = '';
+
+      const stemH = n === 0 ? 0 : Math.min(8 + n * 9, 85);
+      const cx = 50, baseY = H - 10;
+
+      if (n === 0) {
+        const d = document.createElementNS(ns,'ellipse');
+        d.setAttribute('cx',cx); d.setAttribute('cy',baseY+2);
+        d.setAttribute('rx','22'); d.setAttribute('ry','6');
+        d.setAttribute('fill','#8B5E3C'); svgEl.appendChild(d);
+        return;
+      }
+
+      // stem
+      const stem = document.createElementNS(ns,'rect');
+      stem.setAttribute('x','47'); stem.setAttribute('y', baseY - stemH);
+      stem.setAttribute('width','6'); stem.setAttribute('height', stemH);
+      stem.setAttribute('rx','3'); stem.setAttribute('fill','#2D7A4F');
+      svgEl.appendChild(stem);
+
+      // leaves
+      const leafData = [
+        { minN:2, cx:36, ry: baseY - stemH*0.45, rx:16, ryE:9, fill:'#3a9060', rot:-30 },
+        { minN:3, cx:64, ry: baseY - stemH*0.62, rx:16, ryE:9, fill:'#4CAF50', rot:30 },
+        { minN:5, cx:34, ry: baseY - stemH*0.78, rx:14, ryE:8, fill:'#66BB6A', rot:-42 },
+      ];
+      leafData.forEach(l => {
+        if (n < l.minN) return;
+        const el = document.createElementNS(ns,'ellipse');
+        el.setAttribute('cx',l.cx); el.setAttribute('cy',l.ry);
+        el.setAttribute('rx',l.rx); el.setAttribute('ry',l.ryE);
+        el.setAttribute('fill',l.fill);
+        el.setAttribute('transform',`rotate(${l.rot} ${l.cx} ${l.ry})`);
+        svgEl.appendChild(el);
+      });
+
+      // head
+      const headY = baseY - stemH - 20;
+      const headR = Math.min(14 + n, 24);
+      const head = document.createElementNS(ns,'circle');
+      head.setAttribute('cx',cx); head.setAttribute('cy',headY);
+      head.setAttribute('r',headR); head.setAttribute('fill','#4CAF50');
+      svgEl.appendChild(head);
+
+      // spikes
+      if (n >= 3) {
+        const spikes = Math.min(3 + Math.floor(n/2), 8);
+        for (let i=0; i<spikes; i++) {
+          const ang = (-70 + i * 140/(spikes-1)) * Math.PI/180;
+          const sx = cx + Math.cos(ang)*headR*0.85, sy = headY + Math.sin(ang)*headR*0.85;
+          const tx = cx + Math.cos(ang)*(headR+8+(i%2)*5), ty = headY + Math.sin(ang)*(headR+8+(i%2)*5);
+          const sp = document.createElementNS(ns,'line');
+          sp.setAttribute('x1',sx); sp.setAttribute('y1',sy);
+          sp.setAttribute('x2',tx); sp.setAttribute('y2',ty);
+          sp.setAttribute('stroke','#2D7A4F'); sp.setAttribute('stroke-width','2.5');
+          sp.setAttribute('stroke-linecap','round'); svgEl.appendChild(sp);
+        }
+      }
+
+      // eyes
+      const eyeY = headY - 3, eyeR = n >= 6 ? 4 : 3;
+      [cx-7, cx+7].forEach(ex => {
+        const e = document.createElementNS(ns,'circle');
+        e.setAttribute('cx',ex); e.setAttribute('cy',eyeY);
+        e.setAttribute('r',eyeR); e.setAttribute('fill','#1A0A0A'); svgEl.appendChild(e);
+        const shine = document.createElementNS(ns,'circle');
+        shine.setAttribute('cx',ex+1.5); shine.setAttribute('cy',eyeY-1.5);
+        shine.setAttribute('r','1.2'); shine.setAttribute('fill','#fff'); svgEl.appendChild(shine);
+      });
+
+      // mouth
+      const mY = headY + 6;
+      if (n >= 10) {
+        const m = document.createElementNS(ns,'path');
+        m.setAttribute('d',`M ${cx-10} ${mY} Q ${cx} ${mY+10} ${cx+10} ${mY}`);
+        m.setAttribute('fill','none'); m.setAttribute('stroke','#1A0A0A');
+        m.setAttribute('stroke-width','2'); m.setAttribute('stroke-linecap','round'); svgEl.appendChild(m);
+        for (let t=0; t<3; t++) {
+          const tooth = document.createElementNS(ns,'rect');
+          tooth.setAttribute('x', cx-7+t*6); tooth.setAttribute('y',mY+1);
+          tooth.setAttribute('width','4'); tooth.setAttribute('height','4');
+          tooth.setAttribute('rx','1'); tooth.setAttribute('fill','#fff'); svgEl.appendChild(tooth);
+        }
+      } else if (n >= 6) {
+        const m = document.createElementNS(ns,'path');
+        m.setAttribute('d',`M ${cx-8} ${mY} Q ${cx} ${mY+7} ${cx+8} ${mY}`);
+        m.setAttribute('fill','none'); m.setAttribute('stroke','#1A0A0A');
+        m.setAttribute('stroke-width','1.8'); m.setAttribute('stroke-linecap','round'); svgEl.appendChild(m);
+      } else if (n >= 3) {
+        const m = document.createElementNS(ns,'path');
+        m.setAttribute('d',`M ${cx-6} ${mY+2} Q ${cx} ${mY+5} ${cx+6} ${mY+2}`);
+        m.setAttribute('fill','none'); m.setAttribute('stroke','#1A0A0A');
+        m.setAttribute('stroke-width','1.8'); m.setAttribute('stroke-linecap','round'); svgEl.appendChild(m);
+      } else {
+        const m = document.createElementNS(ns,'line');
+        m.setAttribute('x1',cx-5); m.setAttribute('y1',mY+2);
+        m.setAttribute('x2',cx+5); m.setAttribute('y2',mY+2);
+        m.setAttribute('stroke','#1A0A0A'); m.setAttribute('stroke-width','1.8');
+        m.setAttribute('stroke-linecap','round'); svgEl.appendChild(m);
+      }
+
+      // stars
+      if (n >= 15) {
+        [[18,32],[82,42],[15,70],[85,74]].forEach(([sx,sy]) => {
+          const st = document.createElementNS(ns,'text');
+          st.setAttribute('x',sx); st.setAttribute('y',sy);
+          st.setAttribute('font-size','12'); st.setAttribute('text-anchor','middle');
+          st.setAttribute('fill','#FFE169'); st.textContent = '✦'; svgEl.appendChild(st);
+        });
+      } else if (n >= 10) {
+        [[20,38],[80,50]].forEach(([sx,sy]) => {
+          const st = document.createElementNS(ns,'text');
+          st.setAttribute('x',sx); st.setAttribute('y',sy);
+          st.setAttribute('font-size','11'); st.setAttribute('text-anchor','middle');
+          st.setAttribute('fill','#FFE169'); st.textContent = '✦'; svgEl.appendChild(st);
+        });
+      }
+    }
+
+    function updatePlantUI(n) {
+      const stage = getStage(n);
+      const nextStage = PLANT_STAGES.find(s => s.min > n);
+      document.getElementById('plantStageName').textContent = stage.name;
+      document.getElementById('plantStageDesc').textContent = stage.desc;
+      document.getElementById('plantCountBadge').textContent = n + (n === 1 ? ' applied' : ' applied');
+
+      const left = nextStage ? nextStage.min - n : 0;
+      document.getElementById('plantProgressLabel').textContent = stage.next.replace('{left}', left);
+
+      const pct = stage.min === stage.max ? 100
+        : Math.round(((n - stage.min) / (stage.max - stage.min)) * 100);
+      document.getElementById('plantBar').style.width = Math.min(pct, 100) + '%';
+
+      drawPlantSvg(document.getElementById('plantMainSvg'), n, 1);
+      drawPlantSvg(document.getElementById('plantMiniSvg'), n, 0.56);
+
+      // wobble
+      const mainSvg = document.getElementById('plantMainSvg');
+      mainSvg.classList.remove('plant-wobble');
+      void mainSvg.offsetWidth;
+      mainSvg.classList.add('plant-wobble');
+    }
+
+    function initPlantWidget(n) {
+      document.getElementById('plantWidget').style.display = 'flex';
+      updatePlantUI(n);
+      // Show bubble briefly on load
+      setTimeout(() => {
+        const bubble = document.getElementById('plantBubble');
+        bubble.classList.add('visible');
+        setTimeout(() => bubble.classList.remove('visible'), 2500);
+      }, 800);
+    }
+
+    let drawerOpen = false;
+    function togglePlantDrawer() {
+      drawerOpen = !drawerOpen;
+      document.getElementById('plantDrawer').classList.toggle('open', drawerOpen);
+    }
+  </script>
+</body>
+</html>

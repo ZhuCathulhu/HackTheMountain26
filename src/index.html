@@ -1,62 +1,188 @@
-<!doctype html>
-<meta charset="UTF-8" />
-<title>Auth0 Sample App</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performr</title>
+  <link rel="stylesheet" href="styleLanding.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+</head>
 
-<div id="view-loading">Loading...</div>
+<body>
 
-<div id="view-error" hidden></div>
+  <!-- Error view (hidden until needed) -->
+  <div id="view-error" hidden style="padding:20px;color:red;"></div>
 
-<div id="view-authenticated" hidden>
-  <p>Logged in as <span id="user-email"></span></p>
-  <h1>User Profile</h1>
-  <pre id="user-profile"></pre>
-  <button onclick="client.logout({logoutParams:{returnTo:location.origin}})">Logout</button>
-</div>
+  <nav>
+    <img src="assets/performr.png" alt="Performr logo" class="logo" />
+    <div class="nav-actions">
+      <a href="#" class="btn btn-orange" id="btn-signup">Sign up</a>
+      <a href="#" class="btn btn-yellow" id="btn-signin">Sign in</a>
+    </div>
+  </nav>
 
-<div id="view-unauthenticated" hidden>
-  <button onclick="client.loginWithRedirect({authorizationParams:{screen_hint:'signup'}})">Signup</button>
-  <button onclick="client.loginWithRedirect()">Login</button>
-</div>
+  <!-- HERO -->
+  <header class="hero">
+    <video autoplay muted loop playsinline class="hero-video">
+      <source src="assets/bgperformer.mp4" type="video/mp4" />
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">
+        All the world's a stage, and all the men and women merely players.
+      </h1>
+      <p class="hero-sub">Are you ready to make your entrance?</p>
+      <div class="hero-btns">
+        <a href="#" class="btn btn-orange" id="hero-btn-signup">Join Performr for free</a>
+        <a href="#" class="btn btn-yellow" id="hero-btn-signin">I already have an account</a>
+      </div>
+    </div>
+  </header>
 
-<!-- Install the Auth0 SPA SDK -->
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <!-- FIND -->
+  <section class="section-find">
+    <div class="find-grid">
+      <div class="find-card reveal">
+        <h2>Find opportunities,<br>find performers</h2>
+        <p>No more word of mouth searching. Performr is the networking platform for performance artists.</p>
+        <a href="#" class="btn btn-orange" id="find-btn-signup">Sign up</a>
+      </div>
+      <div class="img-block img-top reveal"><img src="assets/performer2.jpg"></div>
+      <div class="img-block img-bottom-left reveal"><img src="assets/performer3.jpg"></div>
+      <div class="img-bottom-right reveal"><img class="border-radius" src="assets/performer1.jpg"></div>
+    </div>
+  </section>
 
-<script>
-  // Helpers
-  const displayView = name => ['loading', 'error', 'authenticated', 'unauthenticated'].forEach(v => document.getElementById(`view-${v}`).hidden = v !== name);
-  const setTextContent = (id, content) => document.getElementById(id).textContent = content;
+  <!-- FEATURES -->
+  <section class="section-features">
+    <div class="features-header reveal">
+      <h2>Get ready to make it big.</h2>
+      <p>Performr has everything a grassroots artist actually needs.</p>
+    </div>
+    <div class="features-grid">
+      <article class="feature-item reveal">
+        <h4>Live local map:</h4>
+        <p>See real-time gigs and open calls. Relive the flash mob era.</p>
+      </article>
+      <article class="feature-item reveal">
+        <h4>No vibe killers allowed:</h4>
+        <p>A robust authentication system keeps our community genuine.</p>
+      </article>
+      <article class="feature-item reveal">
+        <h4>Emergency roster:</h4>
+        <p>Find last-minute performers quicker than you can say "break a leg"!</p>
+      </article>
+      <article class="feature-item reveal">
+        <h4>Performer profiles:</h4>
+        <p>Show the world what they're missing with a user profile tailored to your talents.</p>
+      </article>
+    </div>
+  </section>
 
-  (async () => {
-    // Initialize the Auth0 SDK
-    window.client = await auth0.createAuth0Client({
-      domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
-      clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-      authorizationParams: { redirect_uri: location.origin },
-    });
+  <!-- CTA -->
+  <section class="section-cta">
+    <div class="cta-inner reveal">
+      <h2>Your next gig is<br>closer than you think.</h2>
+      <a href="#" class="btn btn-orange" id="cta-btn-signup">Sign up now</a>
+    </div>
+  </section>
 
-    // Handle errors returned by Auth0 after a redirect
-    if (location.search.includes("error=")) {
-      const params = new URLSearchParams(location.search);
-      setTextContent("view-error", `Error: ${params.get("error")} — ${params.get("error_description")}`);
-      displayView("error");
-      history.replaceState({}, "", location.pathname);
-      return;
-    }
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Performr</p>
+    <p>All the world's a stage.</p>
+  </footer>
 
-    // Handle the redirect callback after a successful login
-    if (location.search.includes("code=") && location.search.includes("state=")) {
-      await window.client.handleRedirectCallback();
-      history.replaceState({}, "", location.pathname);
-    }
+  <script>
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add("visible");
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 
-    if (await window.client.isAuthenticated()) {
-      const user = await window.client.getUser();
-      setTextContent("user-email", user.email);
-      setTextContent("user-profile", JSON.stringify(user, null, 2));
-      displayView("authenticated");
-      return;
-    }
+    // Auth
+    (async () => {
+      const client = await auth0.createAuth0Client({
+        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+        authorizationParams: {
+          redirect_uri: location.origin,
+          audience: 'https://performr.api',
+        },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
+      });
 
-    displayView("unauthenticated");
-  })();
-</script>
+      // Handle error callback
+      if (location.search.includes("error=")) {
+        const params = new URLSearchParams(location.search);
+        const el = document.getElementById("view-error");
+        el.textContent = `Error: ${params.get("error")} — ${params.get("error_description")}`;
+        el.hidden = false;
+        history.replaceState({}, "", location.pathname);
+        return;
+      }
+
+      // Handle login callback
+      if (location.search.includes("code=") && location.search.includes("state=")) {
+        try {
+          await client.handleRedirectCallback();
+        } catch (e) {
+          const el = document.getElementById("view-error");
+          el.textContent = `Callback error: ${e.message}`;
+          el.hidden = false;
+          return;
+        }
+        history.replaceState({}, "", location.pathname);
+        // Flush any profile data saved by signup.html before the Auth0 redirect
+        const pendingProfile = localStorage.getItem('performr_pending_profile');
+        if (pendingProfile) {
+          localStorage.removeItem('performr_pending_profile');
+          try {
+            const user = await client.getUser();
+            const profile = { ...JSON.parse(pendingProfile), id: user.sub, email: user.email };
+            const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
+            await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+              method: 'POST',
+              headers: {
+                'apikey':        SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type':  'application/json',
+                'Prefer':        'return=minimal',
+              },
+              body: JSON.stringify(profile),
+            });
+          } catch (e) {
+            console.warn('Could not flush pending profile:', e.message);
+          }
+        }
+
+        window.location.href = "explore.html";
+        return;
+      }
+
+      // Already logged in — skip the landing page
+      if (await client.isAuthenticated()) {
+        window.location.href = "explore.html";
+        return;
+      }
+
+      // Wire up all signup/signin buttons
+      const signup = () => { window.location.href = 'signup.html'; };
+      const signin = () => client.loginWithRedirect();
+
+      document.getElementById('btn-signup').addEventListener('click', e => { e.preventDefault(); signup(); });
+      document.getElementById('btn-signin').addEventListener('click', e => { e.preventDefault(); signin(); });
+      document.getElementById('hero-btn-signup').addEventListener('click', e => { e.preventDefault(); signup(); });
+      document.getElementById('hero-btn-signin').addEventListener('click', e => { e.preventDefault(); signin(); });
+      document.getElementById('find-btn-signup').addEventListener('click', e => { e.preventDefault(); signup(); });
+      document.getElementById('cta-btn-signup').addEventListener('click', e => { e.preventDefault(); signup(); });
+    })();
+  </script>
+
+</body>
+</html>

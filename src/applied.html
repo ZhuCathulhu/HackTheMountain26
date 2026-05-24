@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applied – Performr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-layout">
+
+  <header>
+    <img src="assets/performr.png" alt="Performr logo" class="logo" />
+    <a href="profile.html"></a>
+  </header>
+
+  <nav>
+    <a href="explore.html">Explore</a>
+    <a href="applied.html">Applied</a>
+    <a href="listings.html">My Listings</a>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>Applied Roles</h1>
+    </div>
+    <ul class="roles" id="roles-list">
+      <li>Loading…</li>
+    </ul>
+  </main>
+
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script>
+    (async () => {
+      const { createClient } = supabase;
+      window.db = createClient(
+        'https://golijzcjitljymhpjaur.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk'
+      );
+      window.client = await auth0.createAuth0Client({
+        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+        authorizationParams: { redirect_uri: location.origin, audience: 'https://performr.api' },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
+      });
+
+      if (!(await window.client.isAuthenticated())) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const user = await window.client.getUser();
+      window.currentUser = user;
+
+      const list = document.getElementById('roles-list');
+      list.innerHTML = '';
+
+      // Fetch applications for this user, joining role details
+      const { data, error } = await window.db
+        .from('applications')
+        .select('*, roles(*)')
+        .eq('applicant_id', user.sub);
+
+      if (error) {
+        console.error('Supabase error:', error.message, error.hint);
+        list.innerHTML = '<li>Failed to load applications.</li>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        list.innerHTML = "<li>You haven't applied to any roles yet.</li>";
+        return;
+      }
+
+      const statusColor = { pending: '#888', accepted: '#2D7A4F', rejected: '#B83232' };
+
+      data.forEach(application => {
+        const role = application.roles;
+        if (!role) return; // deleted role
+
+        const color = statusColor[application.status] ?? '#888';
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <h2>${role.name ?? '—'}</h2>
+          <p>${role.addr ? role.addr + ', ' : ''}${role.city ?? ''}</p>
+          <footer>
+            ${role.genre    ? `<span>${role.genre}</span>`    : ''}
+            ${role.level    ? `<span>${role.level}</span>`    : ''}
+            ${role.location ? `<span>${role.location}</span>` : ''}
+            ${role.uniform  ? `<span>${role.uniform}</span>`  : ''}
+          </footer>
+          <p class="status" style="color:${color}">
+            Status: <strong>${application.status}</strong>
+          </p>
+        `;
+        list.appendChild(li);
+      });
+    })();
+  </script>
+</body>
+</html>
