@@ -356,6 +356,38 @@
     </ul>
   </main>
 
+      </div>
+  </div>
+
+  <!-- ── Plant Widget ── -->
+  <div class="plant-widget" id="plantWidget" style="display:none">
+    <div class="plant-bubble" id="plantBubble">your garden 🌱</div>
+    <div class="plant-toggle" id="plantToggle" onclick="togglePlantDrawer()">
+      <svg id="plantMiniSvg" width="56" height="64" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="plant-count-badge" id="plantCountBadge">0 applied</div>
+    </div>
+  </div>
+
+  <div class="plant-drawer" id="plantDrawer">
+    <div class="plant-drawer-header">
+      <span class="plant-drawer-title">your performr garden</span>
+      <button class="plant-drawer-close" onclick="togglePlantDrawer()">✕</button>
+    </div>
+    <div class="plant-stage-row">
+      <div class="plant-svg-wrap">
+        <svg id="plantMainSvg" width="100" height="120" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="plant-text">
+        <div class="plant-stage-name" id="plantStageName">A blank pot</div>
+        <div class="plant-stage-desc" id="plantStageDesc">Nothing's growing yet. Your plant is judging you silently.</div>
+      </div>
+    </div>
+    <div class="plant-progress-track">
+      <div class="plant-progress-bar" id="plantBar" style="width:0%"></div>
+    </div>
+    <div class="plant-progress-label" id="plantProgressLabel">Apply to a role to wake it up</div>
+  </div>
+
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
