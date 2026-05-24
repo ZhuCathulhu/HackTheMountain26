@@ -1,2 +1,2 @@
-# PERFORMR
+# performr
 A project for Hack the Mountain 2026.
