@@ -240,9 +240,17 @@
       });
     });
 
-    // Org toggle
-    document.getElementById('orgToggle').addEventListener('change', function () {
-      document.getElementById('orgNameField').style.display = this.checked ? 'flex' : 'none';
+    // Role pills
+    let selectedRole = null;
+    document.querySelectorAll('.role-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.role-pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+        selectedRole = pill.dataset.role;
+        const needsOrg = selectedRole === 'organizer' || selectedRole === 'both';
+        document.getElementById('orgNameField').style.display = needsOrg ? 'flex' : 'none';
+        if (!needsOrg) document.getElementById('orgName').value = '';
+      });
     });
 
     async function submitProfile() {
@@ -251,7 +259,6 @@
       errEl.style.display = 'none';
 
       const displayName = document.getElementById('displayName').value.trim();
-      const isOrg       = document.getElementById('orgToggle').checked;
       const orgName     = document.getElementById('orgName')?.value.trim();
 
       if (!displayName) {
@@ -259,7 +266,12 @@
         errEl.style.display = 'block';
         return;
       }
-      if (isOrg && !orgName) {
+      if (!selectedRole) {
+        errEl.textContent = 'Please select an account type.';
+        errEl.style.display = 'block';
+        return;
+      }
+      if ((selectedRole === 'organizer' || selectedRole === 'both') && !orgName) {
         errEl.textContent = 'Please enter your organisation name.';
         errEl.style.display = 'block';
         return;
@@ -269,9 +281,8 @@
       btn.textContent = 'Saving…';
 
       try {
-        // Save profile data to localStorage — id and email are unknown until Auth0 creates the account.
-        // index.html will read this after the Auth0 callback and write the row to Supabase.
         const profile = {
+          role:              selectedRole,
           org_user:          (selectedRole === 'organizer' || selectedRole === 'both') ? (orgName || null) : null,
           display_name:      displayName,
           discipline:        selectedDiscipline || null,
@@ -283,7 +294,6 @@
 
         localStorage.setItem('performr_pending_profile', JSON.stringify(profile));
 
-        // Redirect to Auth0 signup — index.html is the callback URL
         await auth0Client.loginWithRedirect({
           authorizationParams: { screen_hint: 'signup' },
         });
