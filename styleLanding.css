@@ -36,6 +36,12 @@ h2 {
   font-size: 2.5rem;
 }
 
+h4 {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #FFE169;
+}
+
 p {
   font-size: 1.2rem;
   line-height: 1.6;
@@ -130,10 +136,6 @@ img.logo {
   color: #f7e96b;
 }
 
-.btn-cta {
-  background: #e8392b;
-  color: white;
-}
 
 /* HERO */
 
@@ -317,7 +319,7 @@ img.logo {
 }
 
 .border-radius:hover {
-  transform: scale(1.04);
+  transform: scale(1.01);
     transition: transform 0.3s ease;
 
 }
@@ -334,7 +336,12 @@ img.logo {
 .section-features {
   padding: 8rem 4rem;
 
-  background: #460000;
+  background: #460000b6;
+  background-image: url('assets/performer4.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-blend-mode: overlay;
   color: #FFFEE0;
 
   height: 100%;
@@ -348,7 +355,7 @@ img.logo {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
 
-  gap: 3rem;
+  gap: 6rem;
 }
 
 .feature-item {
@@ -357,68 +364,56 @@ img.logo {
   padding-top: 1.5rem;
 }
 
-.feature-num {
-  display: block;
-
-  margin-bottom: 1rem;
-
-  color: #e8392b;
+/* CTA */
+.section-cta {
+  position: relative; /* Required for absolute positioning of borders */
+  padding: 8rem 2rem;
+  text-align: center;
+  background: #FFE169;
 }
 
-/* CTA */
+/* Shared styles for both borders */
+.section-cta::before,
+.section-cta::after {
+  content: "";
+  position: absolute;
+  left: 1.5rem;   /* Horizontal inset from left edge */
+  right: 1.5rem;  /* Horizontal inset from right edge */
+  pointer-events: none; /* Ensures borders don't block clicks on buttons/links */
+}
 
-.section-cta {
-  padding: 8rem 2rem;
+/* Top border */
+.section-cta::before {
+  top: 1.5rem;    /* Vertical inset from top edge */
+  border-top: 2.5px dashed #460000; /* Matches your existing style */
+}
 
-  text-align: center;
-
-  background: #e8392b;
+/* Bottom border */
+.section-cta::after {
+  bottom: 1.5rem; /* Vertical inset from bottom edge */
+  border-bottom: 2.5px dashed #460000;
 }
 
 .cta-inner {
-  max-width: 700px;
+  max-width: 900px;
   margin: auto;
 }
 
 .cta-inner h2 {
-  font-size: clamp(2.5rem, 6vw, 5rem);
-
-  color: white;
-
-  margin:
-    1rem 0
-    2rem;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  color: #460000;
+  margin: 1rem 0 3rem;
 }
 
 /* FOOTER */
 
 footer {
-  padding: 3rem 2rem;
-
-  background: #0f0500;
-  color: rgba(255,255,255,0.7);
-}
-
-.footer-top,
-.footer-bottom {
+  padding: 1rem 2rem;
+  background: #460000;
+  color: #FFE169;
   display: flex;
-  justify-content: space-between;
-
-  gap: 2rem;
-}
-
-.footer-top {
-  margin-bottom: 2rem;
-}
-
-.footer-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.footer-links a {
-  color: inherit;
-  text-decoration: none;
+  flex-direction: row;
+  justify-content: space-between; /* Keeps content aligned to the left */
 }
 
 /* MOBILE */
@@ -427,7 +422,6 @@ footer {
 
   .section-find,
   .features-grid,
-  .footer-top,
   .footer-bottom {
     grid-template-columns: 1fr;
     flex-direction: column;
