@@ -394,7 +394,6 @@
         document.getElementById('uniformOther').value = '';
       });
     });
-  })();
 
   // ── Submit ──
   async function submitRole() {
@@ -433,7 +432,7 @@
       uniform:    uniform || null,
       lat,
       lng,
-      created_by: window.currentUser.sub,
+      created_by: currentUser.sub,
     };
 
     btn.disabled = true;
@@ -444,11 +443,11 @@
         console.log('TOKEN:', token);
         console.log('PARTS:', token.split('.').length);
 
-      const res = await fetch('https://golijzcjitljymhpjaur.supabase.co/rest/v1/roles', {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/roles`, {
         method: 'POST',
         headers: {
-          'apikey':        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk',
-          'Authorization': `Bearer ${token}`,
+          'apikey':        SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           'Content-Type':  'application/json',
           'Prefer':        'return=representation',
         },
