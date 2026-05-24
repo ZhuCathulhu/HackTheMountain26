@@ -7,6 +7,23 @@
   <title>Explore – Performr</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* Description preview on cards */
+    .card-description {
+      font-size: .85rem;
+      font-style: italic;
+      color: #666;
+      line-height: 1.45;
+      margin-top: .35rem;
+      margin-bottom: 5px;
+      /* clamp to 2 lines */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body class="explore">
 
@@ -120,16 +137,6 @@ const FILTER_DEFS = {
 
 const filters = {};
 Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); });
-
-/* ── Data ── */
-// Each role must have a value for every filter key so filtered() can test it.
-/*const roles = [
-  { id: 1, name: "Tap Ensemble",        addr: "4205 Rue Jean-Talon Ouest", city: "Montréal, QC",  genre: "dance",        level: "intermediate", location: "indoors",  uniform: "uniform required",  lat: 45.4960, lng: -73.6350 },
-  { id: 2, name: "Jazz Quartet",         addr: "3035 Boul. Le Carrefour",   city: "Laval, QC",     genre: "instrumental", level: "pro",          location: "venue",    uniform: "no uniform",        lat: 45.5580, lng: -73.7350 },
-  { id: 3, name: "Youth Theatre Troupe", addr: "1000 Rue Ste-Catherine",    city: "Longueuil, QC", genre: "theatre",      level: "beginner",     location: "indoors",  uniform: "uniform provided",  lat: 45.5350, lng: -73.5120 },
-  { id: 4, name: "Street Dance Crew",    addr: "3232 Boul. St-Charles",     city: "Kirkland, QC",  genre: "dance",        level: "novice",       location: "outdoors", uniform: "no uniform",        lat: 45.4490, lng: -73.8700 },
-  { id: 5, name: "Community Orchestra",  addr: "900 Boul. des Laurentides",  city: "St-Jérôme, QC", genre: "instrumental", level: "no experience",location: "venue",    uniform: "uniform provided",  lat: 45.7750, lng: -74.0020 },
-];*/
 
 const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
@@ -268,6 +275,11 @@ function render() {
     const isOwn      = role.created_by === window.currentUser?.sub;
     const hasApplied = window.appliedRoleIds?.has(role.id);
 
+    // Description preview — only rendered if description is non-empty
+    const descHtml = role.description
+      ? `<p class="card-description">${role.description}</p>`
+      : '';
+
     div.innerHTML = `
       <div class="card-row1">
         <div class="pin-dot"></div>
@@ -275,6 +287,7 @@ function render() {
         ${isCustom ? '<span class="card-type-tag">custom</span>' : ''}
       </div>
       <div class="card-addr">${role.addr ? role.addr + ', ' : ''}${role.city}</div>
+      ${descHtml}
       <div class="card-footer">
         ${!isCustom ? `
           <span class="tag-pill">${role.genre}</span>
@@ -323,7 +336,7 @@ function render() {
               status:       'pending',
             }),
           });
-          if (res.ok || res.status === 409) { // 409 = already applied (unique constraint)
+          if (res.ok || res.status === 409) {
             window.appliedRoleIds.add(role.id);
             btn.classList.remove('loading');
             btn.classList.add('applied');
@@ -412,7 +425,7 @@ document.getElementById('search').addEventListener('input', (e) => {
 /* ── Init ── */
 async function loadRoles() {
   try {
-    roles = []; // ← add this line at the top
+    roles = [];
     Object.values(markerMap).forEach(m => map.removeLayer(m));
     Object.keys(markerMap).forEach(k => delete markerMap[k]);
     activeId = null;
@@ -434,7 +447,8 @@ async function loadRoles() {
       level:    (r.level    ?? '').toLowerCase(),
       location: (r.location ?? '').toLowerCase(),
       uniform:  (r.uniform  ?? '').toLowerCase(),
-      
+      // description is passed through as-is (string or null)
+      description: r.description ?? null,
     }));
     nextId = Math.max(...roles.map(r => r.id), 5) + 1;
     render();

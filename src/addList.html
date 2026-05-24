@@ -64,6 +64,54 @@
       color: #fff;
     }
 
+    /* event description textarea */
+    .event-description-field {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      margin-top: .25rem;
+    }
+    .event-description-field label {
+      font-size: .85rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .event-description-field textarea {
+      width: 100%;
+      padding: .75rem .9rem;
+      border: 1.5px solid #e4e4e0;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .88rem;
+      color: #111;
+      background: #fafafa;
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.5;
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+    }
+    .event-description-field textarea::placeholder {
+      color: #bbb;
+    }
+    .event-description-field textarea:focus {
+      border-color: #111;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+      background: #fff;
+    }
+    .event-description-field .char-count {
+      font-size: .75rem;
+      color: #aaa;
+      text-align: right;
+      margin-top: .15rem;
+    }
+    .event-description-field .char-count.near-limit {
+      color: #e07b00;
+    }
+    .event-description-field .char-count.at-limit {
+      color: #c0392b;
+    }
+
     /* submit area */
     .form-footer {
       padding: 1.25rem 1.5rem;
@@ -227,6 +275,18 @@
           <span data-value="Formal">Formal</span>
           <span data-value="None">None</span>
         </div>
+
+        <!-- ── NEW: Event Description ── -->
+        <div class="event-description-field" style="margin-top: 1.25rem;">
+          <label for="eventDescription">Event description</label>
+          <textarea
+            id="eventDescription"
+            maxlength="600"
+            placeholder="Describe the event — what performers can expect, the vibe, any special requirements, compensation details, etc."
+          ></textarea>
+          <span class="char-count" id="descCharCount">0 / 600</span>
+        </div>
+
       </div>
 
       <!-- SUBMIT -->
@@ -282,6 +342,17 @@
       });
     });
 
+    // Character counter for event description
+    const descTextarea = document.getElementById('eventDescription');
+    const descCharCount = document.getElementById('descCharCount');
+    descTextarea.addEventListener('input', () => {
+      const len = descTextarea.value.length;
+      const max = parseInt(descTextarea.getAttribute('maxlength'));
+      descCharCount.textContent = `${len} / ${max}`;
+      descCharCount.className = 'char-count' +
+        (len >= max ? ' at-limit' : len >= max * 0.85 ? ' near-limit' : '');
+    });
+
   document.getElementById('geocodeBtn').addEventListener('click', async () => {
   const addr   = document.getElementById('roleAddr').value.trim();
   const city   = document.getElementById('roleCity').value.trim();
@@ -321,23 +392,6 @@
   }
 });
 
-  status.textContent = 'Looking up coordinates…';
-  status.style.color = '#888';
-
-  const geocoder = L.Control.Geocoder.nominatim();
-  geocoder.geocode(query, (results) => {
-    if (!results || results.length === 0) {
-      status.textContent = '⚠️ Address not found. Try adding a city or country.';
-      status.style.color = '#c00';
-      return;
-    }
-    const { lat, lng } = results[0].center;
-    document.getElementById('roleLat').value = lat.toFixed(6);
-    document.getElementById('roleLng').value = lng.toFixed(6);
-    status.textContent = `✓ Found: ${results[0].name}`;
-    status.style.color = '#2a7a2a';
-  });
-
   // ── Submit ──
   async function submitRole() {
     const btn = document.getElementById('submitBtn');
@@ -367,15 +421,16 @@
 
       const payload = {
         name,
-        genre:      genre || null,
-        level:      document.getElementById('roleLevel').value || null,
-        addr:       document.getElementById('roleAddr').value.trim() || null,
-        city:       document.getElementById('roleCity').value.trim() || null,
-        location:   document.getElementById('roleLocation').value || null,
-        uniform:    uniform || null,
+        genre:       genre || null,
+        level:       document.getElementById('roleLevel').value || null,
+        addr:        document.getElementById('roleAddr').value.trim() || null,
+        city:        document.getElementById('roleCity').value.trim() || null,
+        location:    document.getElementById('roleLocation').value || null,
+        uniform:     uniform || null,
+        description: document.getElementById('eventDescription').value.trim() || null,
         lat,
         lng,
-        created_by: currentUser.sub,
+        created_by:  currentUser.sub,
       };
 
       btn.disabled = true;
