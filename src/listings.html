@@ -38,6 +38,53 @@
       pointer-events: none;
     }
 
+    /* ── Confirm delete dialog ── */
+    #confirmOverlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(70,0,0,0.45);
+      z-index: 600;
+      align-items: center; justify-content: center;
+    }
+    #confirmOverlay.open { display: flex; }
+
+    #confirmDialog {
+      background: #FFFEE0;
+      border: 2.5px dashed #460000;
+      border-radius: 18px;
+      padding: 28px 28px 24px;
+      width: min(380px, 90vw);
+      display: flex; flex-direction: column; gap: 14px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    #confirmDialog h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-weight: 700; color: #321F1F;
+    }
+    #confirmDialog p {
+      font-size: 13px; color: #460000; line-height: 1.55; opacity: 0.85;
+    }
+    #confirmRoleName { font-weight: 700; font-style: italic; }
+    .confirm-btns {
+      display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px;
+    }
+    #btnCancelDelete {
+      padding: 8px 20px; font-size: 13px; font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      border: 2px dashed #460000; border-radius: 999px;
+      background: #FFFEE0; color: #460000; cursor: pointer;
+      transition: background 0.15s;
+    }
+    #btnCancelDelete:hover { background: #FFE169; }
+    #btnConfirmDelete {
+      padding: 8px 20px; font-size: 13px; font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      border: 2px dashed #460000; border-radius: 999px;
+      background: #B83232; color: #fff; cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    #btnConfirmDelete:hover { background: #8B1A1A; }
+    #btnConfirmDelete:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── Drawer shell ── */
     #drawerShell {
@@ -165,6 +212,18 @@
     </ul>
   </main>
 
+  <!-- Confirm delete dialog -->
+  <div id="confirmOverlay">
+    <div id="confirmDialog">
+      <h3>Delete this role?</h3>
+      <p>
+        You're about to permanently delete <span id="confirmRoleName"></span>.
+        All applications for this role will also be removed. This can't be undone.
+      </p>
+      <div class="confirm-btns">
+        <button id="btnCancelDelete" onclick="cancelDelete()">Cancel</button>
+        <button id="btnConfirmDelete" onclick="confirmDelete()">Delete</button>
+      </div>
     </div>
   </div>
 
@@ -190,6 +249,8 @@
     const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
 
+    let pendingDeleteId   = null;
+    let pendingDeleteWrap = null;
 
     (async () => {
       const { createClient } = supabase;
@@ -209,8 +270,6 @@
       }
 
       window.currentUser = await window.client.getUser();
-      const token = await window.client.getTokenSilently();
-      window.db.functions.setAuth(token);
 
       document.getElementById('btn-create').addEventListener('click', () => {
         window.location.href = 'addList.html';
@@ -230,7 +289,8 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        list.innerHTML = '<li>Failed to load listings.</li>';
+        console.error('loadListings error:', error);
+        list.innerHTML = `<li>Failed to load listings: ${error.message}</li>`;
         return;
       }
       if (!data || data.length === 0) {
@@ -277,19 +337,9 @@
         delBtn.className = 'btn-delete-role';
         delBtn.title = 'Delete role';
         delBtn.innerHTML = '🗑';
-        delBtn.addEventListener('click', async e => {
-          e.stopPropagation();
-          delBtn.disabled = true;
-          await window.db.from('applications').delete().eq('role_id', role.id);
-          const { error } = await window.db.from('roles').delete().eq('id', role.id);
-          if (error) { alert('Failed to delete: ' + error.message); delBtn.disabled = false; return; }
-          wrap.classList.add('deleting');
-          setTimeout(() => {
-            wrap.remove();
-            if (!list.querySelector('.role-card-wrap')) {
-              list.innerHTML = '<li>No listings yet. Create one above!</li>';
-            }
-          }, 260);
+        delBtn.addEventListener('click', e => {
+          e.stopPropagation(); // don't open the drawer
+          promptDelete(role.id, role.name, wrap);
         });
 
         wrap.appendChild(li);
@@ -297,6 +347,64 @@
         list.appendChild(wrap);
       });
     }
+
+    /* ── Delete flow ── */
+
+    function promptDelete(roleId, roleName, wrapEl) {
+      pendingDeleteId   = roleId;
+      pendingDeleteWrap = wrapEl;
+      document.getElementById('confirmRoleName').textContent = `"${roleName || 'this listing'}"`;
+      document.getElementById('btnConfirmDelete').disabled = false;
+      document.getElementById('btnConfirmDelete').textContent = 'Delete';
+      document.getElementById('confirmOverlay').classList.add('open');
+    }
+
+    function cancelDelete() {
+      pendingDeleteId   = null;
+      pendingDeleteWrap = null;
+      document.getElementById('confirmOverlay').classList.remove('open');
+    }
+
+    async function confirmDelete() {
+      if (!pendingDeleteId) return;
+
+      const btn = document.getElementById('btnConfirmDelete');
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+
+      // Delete linked applications first, then the role itself
+      await window.db.from('applications').delete().eq('role_id', pendingDeleteId);
+      const { error } = await window.db.from('roles').delete().eq('id', pendingDeleteId);
+
+      if (error) {
+        alert('Failed to delete: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+        return;
+      }
+
+      // Animate the card out then remove it from the DOM
+      if (pendingDeleteWrap) {
+        pendingDeleteWrap.classList.add('deleting');
+        setTimeout(() => {
+          pendingDeleteWrap.remove();
+          // Show empty state if no cards remain
+          const list = document.getElementById('roles-list');
+          if (!list.querySelector('.role-card-wrap')) {
+            list.innerHTML = '<li>No listings yet. Create one above!</li>';
+          }
+        }, 260);
+      }
+
+      document.getElementById('confirmOverlay').classList.remove('open');
+      pendingDeleteId   = null;
+      pendingDeleteWrap = null;
+    }
+
+    // Close confirm dialog when clicking the dim overlay background
+    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+      if (e.target === this) cancelDelete();
+    });
 
     /* ── Drawer ── */
 
@@ -320,7 +428,7 @@
     }
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeDrawer(); }
+      if (e.key === 'Escape') { closeDrawer(); cancelDelete(); }
     });
 
     /* ── Load & render applicants ── */
