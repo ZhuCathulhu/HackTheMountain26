@@ -396,6 +396,7 @@ async function loadRoles() {
       level:    (r.level    ?? '').toLowerCase(),
       location: (r.location ?? '').toLowerCase(),
       uniform:  (r.uniform  ?? '').toLowerCase(),
+      
     }));
     nextId = Math.max(...roles.map(r => r.id), 5) + 1;
     render();
