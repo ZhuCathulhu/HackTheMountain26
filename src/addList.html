@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create a Role – Performr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-layout">
+
+  <header>
+    <img src="assets/performr.png" alt="Performr logo" class="logo" />
+    <a href="profile.html"></a>
+  </header>
+
+  <nav>
+    <a href="explore.html">Explore</a>
+    <a href="applied.html">Applied</a>
+    <a href="listings.html">My Listings</a>
+  </nav>
+
+  <main>
+<div class="page-header">
+  <a href="listings.html" class="back">←</a>
+  <h1>Create a Role</h1>
+</div>
+
+    <form>
+<section>
+        <p>Basics</p>
+        <label>
+          Role name <span style="color:#FF6558">*</span>
+          <input id="roleName" type="text" placeholder="e.g. Lead Tap Dancer" />
+        </label>
+        <label>
+          Description
+          <textarea id="roleDesc" placeholder="What's the gig? Who are you looking for? Any key details…" rows="4"></textarea>
+        </label>
+        <label>
+          Genre
+          <select id="roleGenre">
+            <option value="">Select a genre…</option>
+            <option>Jazz</option>
+            <option>Hip-Hop</option>
+            <option>Ballet</option>
+            <option>Contemporary</option>
+            <option>Latin</option>
+            <option>Tap</option>
+            <option>Musical Theatre</option>
+            <option>Pop</option>
+            <option>R&B</option>
+            <option>Folk</option>
+            <option>Classical</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label id="genreOtherField" hidden>
+          Specify genre
+          <input id="genreOther" type="text" placeholder="Enter genre…" />
+        </label>
+        <label>
+          Level
+          <select id="roleLevel">
+            <option value="">Select a level…</option>
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+            <option>Professional</option>
+            <option>Any Level</option>
+          </select>
+        </label>
+        <label>
+          Timeline
+          <select id="roleTimeline">
+            <option value="">Select urgency…</option>
+            <option value="now">🔴 Happening Right Now</option>
+            <option value="tonight">Tonight</option>
+            <option value="weekend">This Weekend</option>
+            <option value="2weeks">Next 2 Weeks</option>
+          </select>
+        </label>
+      </section>
+
+      <section>
+        <p>Photo</p>
+        <label>
+          Upload a photo <small>(optional)</small>
+          <input id="rolePhoto" type="file" accept="image/*" />
+        </label>
+      </section>
+
+      <section>
+        <p>Location</p>
+        <label>
+          Address
+          <input id="roleAddr" type="text" placeholder="123 Main St" />
+        </label>
+        <div class="row">
+          <label>
+            City
+            <input id="roleCity" type="text" placeholder="Montreal" />
+          </label>
+          <label>
+            Location type
+            <select id="roleLocation">
+              <option value="">Select…</option>
+              <option>Indoor Studio</option>
+              <option>Outdoor Stage</option>
+              <option>Theatre</option>
+              <option>Club / Venue</option>
+              <option>Street / Public</option>
+              <option>Private Event</option>
+              <option>Remote / Virtual</option>
+              <option>TBD</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Latitude <small>(optional)</small>
+            <input id="roleLat" type="number" step="any" placeholder="45.5017" />
+          </label>
+          <label>
+            Longitude <small>(optional)</small>
+            <input id="roleLng" type="number" step="any" placeholder="-73.5673" />
+          </label>
+        </div>
+      </section>
+
+      <section>
+        <p>Details</p>
+        <label>Uniform / Dress code</label>
+        <div class="pills" id="uniformPills">
+          <span data-value="Black attire">Black attire</span>
+          <span data-value="Costume provided">Costume provided</span>
+          <span data-value="Bring your own">Bring your own</span>
+          <span data-value="Casual">Casual</span>
+          <span data-value="Formal">Formal</span>
+          <span data-value="None">None</span>
+        </div>
+        <label>
+          Or type a custom requirement
+          <input id="uniformOther" type="text" placeholder="e.g. All white, no shoes" />
+        </label>
+      </section>
+
+      <section>
+        <p class="error" id="errorMsg" hidden></p>
+        <button class="submit" type="button" id="submitBtn" onclick="submitRole()">Publish Role →</button>
+      </section>
+    </form>
+  </main>
+
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script>
+    (async () => {
+      if (!await initApp()) return;
+
+      document.getElementById('roleGenre').addEventListener('change', function () {
+        document.getElementById('genreOtherField').hidden = this.value !== 'Other';
+      });
+
+      document.querySelectorAll('#uniformPills span').forEach(pill => {
+        pill.addEventListener('click', () => {
+          pill.classList.toggle('on');
+          document.getElementById('uniformOther').value = '';
+        });
+      });
+    })();
+
+    async function submitRole() {
+      const errEl = document.getElementById('errorMsg');
+      const btn   = document.getElementById('submitBtn');
+      errEl.hidden = true;
+
+      const name = document.getElementById('roleName').value.trim();
+      if (!name) { errEl.textContent = 'Role name is required.'; errEl.hidden = false; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Publishing…';
+
+      try {
+        const token = await window.client.getTokenSilently();
+
+        // Upload photo if provided
+        let photoUrl = null;
+        const photoFile = document.getElementById('rolePhoto').files[0];
+        if (photoFile) {
+          const ext = photoFile.name.split('.').pop();
+          const path = `roles/${Date.now()}.${ext}`;
+          const { error: uploadError } = await window.db.storage
+            .from('role-photos')
+            .upload(path, photoFile, { contentType: photoFile.type });
+          if (!uploadError) {
+            const { data: urlData } = window.db.storage.from('role-photos').getPublicUrl(path);
+            photoUrl = urlData.publicUrl;
+          }
+        }
+
+        const genreSelect = document.getElementById('roleGenre').value;
+        const genre = genreSelect === 'Other'
+          ? document.getElementById('genreOther').value.trim()
+          : genreSelect;
+
+        const selectedPills = [...document.querySelectorAll('#uniformPills span.on')].map(p => p.dataset.value);
+        const uniform = selectedPills.length
+          ? selectedPills.join(', ')
+          : document.getElementById('uniformOther').value.trim();
+
+        const res = await fetch('https://golijzcjitljymhpjaur.supabase.co/rest/v1/roles', {
+          method: 'POST',
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk',
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            name,
+            description: document.getElementById('roleDesc').value.trim() || null,
+            genre:       genre || null,
+            level:       document.getElementById('roleLevel').value || null,
+            timeline:    document.getElementById('roleTimeline').value || null,
+            addr:        document.getElementById('roleAddr').value.trim() || null,
+            city:        document.getElementById('roleCity').value.trim() || null,
+            location:    document.getElementById('roleLocation').value || null,
+            uniform:     uniform || null,
+            lat:         parseFloat(document.getElementById('roleLat').value) || null,
+            lng:         parseFloat(document.getElementById('roleLng').value) || null,
+            photo_url:   photoUrl,
+            created_by:  window.currentUser.sub,
+          }),
+        });
+
+        if (res.ok) { window.location.href = 'listings.html'; }
+        else {
+          const err = await res.json();
+          throw new Error(err.message ?? JSON.stringify(err));
+        }
+      } catch (e) {
+        errEl.textContent = 'Error: ' + e.message;
+        errEl.hidden = false;
+        btn.disabled = false;
+        btn.textContent = 'Publish Role →';
+      }
+    }
+  </script>
+</body>
+</html>

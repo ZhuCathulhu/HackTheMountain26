@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile – Performr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-layout">
+
+  <header>
+    <img src="assets/performr.png" alt="Performr logo" />
+    <a href="profile.html"></a>
+  </header>
+
+  <nav>
+    <a href="explore.html">Explore</a>
+    <a href="applied.html">Applied</a>
+    <a href="listings.html">My Listings</a>
+    <button id="logout-btn">Logout</button>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>My Profile</h1>
+      <button class="create">Edit Profile</button>
+    </div>
+
+    <article>
+      <div class="avatar-row">
+        <div class="avatar"></div>
+        <button class="clear" style="font-size:13px; padding:6px 16px;">Change photo</button>
+      </div>
+
+      <div class="profile-body">
+        <h2>Jane Doe <small>(she/her)</small></h2>
+        <div class="pills">
+          <span class="on">Pianist</span>
+          <span class="on">Intermediate</span>
+          <span class="on">Has Car</span>
+        </div>
+        <h3>Bio</h3>
+        <p>Second-year student looking to help out on indie sets or jam with local bands. Down for last-minute calls!</p>
+      </div>
+    </article>
+
+    <hr>
+
+    <h2>My Work</h2>
+    <ul class="work-grid">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    (async () => {
+      if (!await initApp()) return;
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        window.client.logout({ logoutParams: { returnTo: window.location.origin } });
+      });
+    })();
+  </script>
+</body>
+</html>
