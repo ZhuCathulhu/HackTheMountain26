@@ -1,14 +1,16 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Listings – Performr</title>
+  <title>My Profile – Performr</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class = "profile">
+<body class="profile">
 
   <header>
     <div class="right">
@@ -18,206 +20,305 @@
   </header>
 
   <div class="tab-bar">
-    <a href="explore.html"   class="tab-explore">Explore</a>
-    <a href="applied.html"   class="tab-applied">Applied</a>
-    <a href="listings.html"  class="tab-listings">My Listings</a>
+    <a href="explore.html"  class="tab-explore">Explore</a>
+    <a href="applied.html"  class="tab-applied">Applied</a>
+    <a href="listings.html" class="tab-listings">My Listings</a>
     <button id="logout-btn">Logout</button>
   </div>
-  
+
   <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  
-  body { background: var(--page-bg); font-family: var(--font); }
-  .page {
-    padding: 32px 20px 60px;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-  }
-  .profile-container {
-    background: #fff9e7;;
-    border-radius: 18px;
-    padding: 36px 40px;
-    width: 100%;
-    max-width: 780px;
-  }
-  .profile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
-  }
-  .profile-header h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.5px;
-  }
-  .btn-edit {
-    background: #1A0A0A;
-    color: #fff;
-    border: none;
-    border-radius: 999px;
-    padding: 12px 26px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: var(--font);
-    cursor: pointer;
-  }
-  .btn-edit:hover { background: #3a1a1a; }
-  .profile-info {
-    display: flex;
-    gap: 32px;
-    margin-bottom: 32px;
-    align-items: flex-start;
-  }
-  .avatar-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  .avatar {
-    width: 180px;
-    height: 200px;
-    border-radius: 12px;
-    border-style: dashed;
-    border-width: 3px;
-    border-color:#520606;
-    background: #FFA958;
-  }
-  .change-link {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--brand);
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-family: var(--font);
-  }
-  .profile-details { flex: 1; }
-  .profile-name {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.4px;
-    margin-bottom: 12px;
-  }
-  .profile-name .pronouns {
-    font-weight: 400;
-    color: var(--text-muted);
-    font-size: 22px;
-  }
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  .tag {
-    background: var(--tag-bg);
-    color: var(--tag-text);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 5px 14px;
-    border-radius: 999px;
-  }
-  .bio-label {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .bio-text {
-    font-size: 14px;
-    line-height: 1.65;
-    color: #2a1a14;
-  }
-  .divider {
-    border: none;
-    border-top: 1.5px solid var(--border);
-    margin: 24px 0;
-  }
-  .section-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 16px;
-    letter-spacing: -0.3px;
-  }
-  .work-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-  .work-thumb {
-    aspect-ratio: 1;
-    background: #FFA958;
-    border-radius: 10px;
-    border-style: dashed;
-    border-width: 3px;
-    border-color:#520606;
-  }
-</style>
-<div class="page">
-  <div class="profile-container">
-    <div class="profile-header">
-      <h1>My Profile</h1>
-      <button class="btn-edit">Edit Profile</button>
-    </div>
-    <div class="profile-info">
-      <div class="avatar-wrap">
-        <div class="avatar"></div>
-        <button class="change-link">Change</button>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--page-bg); font-family: var(--font); }
+    .page {
+      padding: 32px 20px 60px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .profile-container {
+      background: #fff9e7;
+      border-radius: 18px;
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 780px;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .profile-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .btn-edit {
+      background: #1A0A0A;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 26px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+    .btn-edit:hover { background: #3a1a1a; }
+    .profile-info {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 32px;
+      align-items: flex-start;
+    }
+    .avatar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 180px;
+      height: 200px;
+      border-radius: 12px;
+      border-style: dashed;
+      border-width: 3px;
+      border-color: #520606;
+      background: #FFA958;
+      object-fit: cover;
+    }
+    .change-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--brand);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font);
+    }
+    .profile-details { flex: 1; }
+    .profile-name {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.4px;
+      margin-bottom: 4px;
+    }
+    .profile-email {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .profile-location {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .bio-label {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .bio-text {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #2a1a14;
+    }
+    .bio-empty {
+      font-size: 14px;
+      color: #aaa;
+      font-style: italic;
+    }
+    .divider {
+      border: none;
+      border-top: 1.5px solid var(--border);
+      margin: 24px 0;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .work-thumb {
+      aspect-ratio: 1;
+      background: #FFA958;
+      border-radius: 10px;
+      border-style: dashed;
+      border-width: 3px;
+      border-color: #520606;
+    }
+    .profile-skeleton {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .portfolio-link {
+      display: inline-block;
+      font-size: 13px;
+      color: #520606;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .portfolio-link:hover { text-decoration: underline; }
+  </style>
+
+  <div class="page">
+    <div class="profile-container" id="profile-container">
+
+      <div class="profile-header">
+        <h1>My Profile</h1>
+        <button class="btn-edit">Edit Profile</button>
       </div>
-      <div class="profile-details">
-        <div class="profile-name">Jane Doe <span class="pronouns">(she/her)</span></div>
-        <div class="tags">
-          <span class="tag-pill">Pianist</span>
-          <span class="tag-pill">Intermediate</span>
-          <span class="tag-pill">Has Car</span>
+
+      <!-- Populated by JS -->
+      <div class="profile-info" id="profile-info">
+        <div class="avatar-wrap">
+          <div class="avatar" id="avatar-el"></div>
+          <button class="change-link">Change</button>
         </div>
-        <div class="bio-label">Bio</div>
-        <div class="bio-text">Second-year student looking to help out on indie sets or jam with local bands. Down for last-minute calls!</div>
+        <div class="profile-details" id="profile-details">
+          <div class="profile-name" id="profile-name">—</div>
+          <div class="profile-email" id="profile-email"></div>
+          <div class="profile-location" id="profile-location"></div>
+          <div class="tags" id="profile-tags"></div>
+          <div class="bio-label">Bio</div>
+          <div id="profile-bio" class="bio-empty">No bio yet.</div>
+          <div id="portfolio-wrap" style="margin-top:12px; display:none;">
+            <a id="portfolio-link" class="portfolio-link" href="#" target="_blank" rel="noopener">🔗 Portfolio</a>
+          </div>
+        </div>
       </div>
-    </div>
-    <hr class="divider">
-    <div class="section-title">My Work</div>
-    <div class="work-grid">
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
+
+      <hr class="divider">
+      <div class="section-title">My Work</div>
+      <div class="work-grid">
+        <div class="work-thumb"></div>
+        <div class="work-thumb"></div>
+        <div class="work-thumb"></div>
+        <div class="work-thumb"></div>
+        <div class="work-thumb"></div>
+        <div class="work-thumb"></div>
+      </div>
+
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
-<script src="auth.js"></script>
-<script>
-  (async () => {
-    window.client = await auth0.createAuth0Client({
-      domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
-      clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-      authorizationParams: { redirect_uri: location.origin,
-        audience: 'https://performr.api',
-      },
-      cacheLocation: 'localstorage',
-      useRefreshTokens: true,
-    });
+  <script>
+    const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
 
-    // Redirect to login if not authenticated
-    if (!(await window.client.isAuthenticated())) {
-      window.location.href = 'index.html';
-      return;
+    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+    function addTag(container, text) {
+      if (!text) return;
+      const span = document.createElement('span');
+      span.className = 'tag-pill';
+      span.textContent = cap(text);
+      container.appendChild(span);
     }
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      window.client.logout({ logoutParams: { returnTo: window.location.origin } });
-    });
-  })();
-</script>
+    (async () => {
+      // Auth
+      const client = await auth0.createAuth0Client({
+        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
+        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
+        authorizationParams: { redirect_uri: location.origin, audience: 'https://performr.api' },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
+      });
+
+      if (!(await client.isAuthenticated())) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const user = await client.getUser();
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        client.logout({ logoutParams: { returnTo: window.location.origin } });
+      });
+
+      // Fetch profile from Supabase
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(user.sub)}&limit=1`,
+        {
+          headers: {
+            'apikey':        SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Accept':        'application/json',
+          }
+        }
+      );
+
+      const rows = await res.json();
+      const profile = rows?.[0] ?? null;
+
+      // Populate name
+      const nameEl = document.getElementById('profile-name');
+      nameEl.textContent = profile?.display_name || user.name || user.email;
+
+      // Email
+      const emailEl = document.getElementById('profile-email');
+      emailEl.textContent = profile?.email || user.email || '';
+
+      // Location
+      const locEl = document.getElementById('profile-location');
+      if (profile?.location) {
+        locEl.textContent = '📍 ' + profile.location;
+      }
+
+      // Tags: discipline, discipline_detail, role, org_user
+      const tagsEl = document.getElementById('profile-tags');
+      if (profile?.discipline_detail) {
+        addTag(tagsEl, profile.discipline_detail);
+      } else if (profile?.discipline) {
+        addTag(tagsEl, profile.discipline);
+      }
+      if (profile?.role) addTag(tagsEl, profile.role);
+      if (profile?.org_user) addTag(tagsEl, profile.org_user);
+
+      // Bio
+      const bioEl = document.getElementById('profile-bio');
+      if (profile?.bio) {
+        bioEl.textContent = profile.bio;
+        bioEl.className = 'bio-text';
+      }
+
+      // Portfolio
+      if (profile?.portfolio_url) {
+        const wrap = document.getElementById('portfolio-wrap');
+        const link = document.getElementById('portfolio-link');
+        link.href = profile.portfolio_url;
+        wrap.style.display = 'block';
+      }
+
+      // Avatar: use Auth0 picture if available
+      if (user.picture) {
+        const avatarEl = document.getElementById('avatar-el');
+        const img = document.createElement('img');
+        img.src = user.picture;
+        img.className = 'avatar';
+        img.alt = 'Profile photo';
+        avatarEl.replaceWith(img);
+      }
+    })();
+  </script>
+
+</body>
+</html>

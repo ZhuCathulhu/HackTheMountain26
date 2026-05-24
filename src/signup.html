@@ -174,15 +174,19 @@
       <!-- ACCOUNT TYPE -->
       <div class="form-section">
         <div class="section-label">Account Type</div>
-        <div class="toggle-row">
-          <div>
-            <div class="toggle-label">Organisation account</div>
-            <div class="toggle-sub">Turn on if you're posting roles on behalf of a group or company</div>
+        <div class="field">
+          <label>How will you use Performr? <span style="color:#c00">*</span></label>
+          <div class="role-group">
+            <div class="role-pill" data-role="performer">
+              <span class="icon">🎭</span><span class="label">Performer</span>
+            </div>
+            <div class="role-pill" data-role="organizer">
+              <span class="icon">📋</span><span class="label">Organizer</span>
+            </div>
+            <div class="role-pill" data-role="both">
+              <span class="icon">⭐</span><span class="label">Both</span>
+            </div>
           </div>
-          <label class="toggle">
-            <input type="checkbox" id="orgToggle" />
-            <span class="toggle-slider"></span>
-          </label>
         </div>
         <div class="field" id="orgNameField">
           <label for="orgName">Organisation Name <span style="color:#c00">*</span></label>
