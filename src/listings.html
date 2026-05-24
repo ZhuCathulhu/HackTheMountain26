@@ -8,18 +8,47 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* ── Drawer shell: sits at top of stacking context, covers full viewport ── */
+
+    /* ── Role card delete button ── */
+    .role-card-wrap { position: relative; }
+    .btn-delete-role {
+      position: absolute;
+      top: 12px; right: 12px;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1.5px dashed #460000;
+      background: #FFFEE0;
+      color: #B83232;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s;
+      z-index: 2;
+    }
+    .role-card-wrap:hover .btn-delete-role { opacity: 1; }
+    .btn-delete-role:hover { background: #FEE2E2; border-color: #B83232; }
+
+    /* Card fade-out animation */
+    @keyframes fadeOut {
+      to { opacity: 0; transform: scale(0.95); }
+    }
+    .role-card-wrap.deleting {
+      animation: fadeOut 0.25s ease forwards;
+      pointer-events: none;
+    }
+
+
+    /* ── Drawer shell ── */
     #drawerShell {
       display: none;
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       z-index: 500;
     }
     #drawerShell.open { display: block; }
 
     #drawerOverlay {
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       background: rgba(70,0,0,0.4);
       cursor: pointer;
     }
@@ -30,25 +59,19 @@
       width: min(440px, 100vw);
       background: #FFFEE0;
       border-left: 2.5px dashed #460000;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      display: flex; flex-direction: column; overflow: hidden;
     }
 
     #drawerHeader {
       padding: 20px 24px 16px;
       border-bottom: 2px dashed #460000;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      flex-shrink: 0;
-      background: #FFF9D6;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px;
+      flex-shrink: 0; background: #FFF9D6;
     }
     #drawerRoleName {
       font-family: 'Playfair Display', serif;
-      font-size: 20px; font-weight: 700;
-      color: #321F1F; margin-bottom: 4px;
+      font-size: 20px; font-weight: 700; color: #321F1F; margin-bottom: 4px;
     }
     #drawerRoleMeta { font-size: 12px; color: #460000; opacity: 0.7; }
     #drawerCount    { font-size: 12px; font-weight: 600; color: #460000; margin-top: 4px; }
@@ -81,7 +104,6 @@
       flex-shrink: 0; overflow: hidden;
     }
     .applicant-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
     .applicant-info { flex: 1; min-width: 0; }
     .applicant-name {
       font-family: 'Playfair Display', serif;
@@ -89,16 +111,12 @@
     }
     .applicant-sub  { font-size: 12px; color: #460000; opacity: 0.7; margin-bottom: 6px; }
     .applicant-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
-    .applicant-bio  {
-      font-size: 12px; color: #321F1F; opacity: 0.85;
-      margin: 4px 0 6px; line-height: 1.55;
-    }
+    .applicant-bio  { font-size: 12px; color: #321F1F; opacity: 0.85; margin: 4px 0 6px; line-height: 1.55; }
     .portfolio-link-small {
       font-size: 12px; color: #460000; font-weight: 600; text-decoration: none;
       display: inline-block; margin-bottom: 6px;
     }
     .portfolio-link-small:hover { text-decoration: underline; }
-
     .status-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
     .status-badge {
       font-size: 11px; font-weight: 700; padding: 3px 10px;
@@ -107,7 +125,6 @@
     .status-badge.pending  { background: #FFE169; color: #321F1F; }
     .status-badge.accepted { background: #D1FAE5; color: #2D7A4F; }
     .status-badge.rejected { background: #FEE2E2; color: #B83232; }
-
     .action-btns { display: flex; gap: 6px; }
     .btn-accept, .btn-reject {
       padding: 4px 14px; font-size: 12px; font-weight: 700;
@@ -118,7 +135,6 @@
     .btn-accept { background: #D1FAE5; color: #2D7A4F; }
     .btn-reject { background: #FEE2E2; color: #B83232; }
     .btn-accept:disabled, .btn-reject:disabled { opacity: 0.4; cursor: default; }
-
     .drawer-empty {
       text-align: center; padding: 48px 0;
       color: #460000; opacity: 0.6; font-size: 14px; line-height: 1.8;
@@ -149,11 +165,10 @@
     </ul>
   </main>
 
-  <!--
-    Drawer shell — placed as a direct child of <body>, outside <main>,
-    so it is never clipped by body.page-layout's overflow-y:auto.
-    display:none lives in CSS (not inline) so the .open class can override it.
-  -->
+    </div>
+  </div>
+
+  <!-- Applicants drawer -->
   <div id="drawerShell">
     <div id="drawerOverlay" onclick="closeDrawer()"></div>
     <aside id="applicantsDrawer">
@@ -175,9 +190,6 @@
     const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
 
-    // Pending delete state
-    let pendingDeleteId   = null;
-    let pendingDeleteCard = null;
 
     (async () => {
       const { createClient } = supabase;
@@ -204,13 +216,18 @@
         window.location.href = 'addList.html';
       });
 
+      await loadListings();
+    })();
+
+    async function loadListings() {
       const list = document.getElementById('roles-list');
       list.innerHTML = '';
 
       const { data, error } = await window.db
         .from('roles')
         .select('*')
-        .eq('created_by', window.currentUser.sub);
+        .eq('created_by', window.currentUser.sub)
+        .order('created_at', { ascending: false });
 
       if (error) {
         list.innerHTML = '<li>Failed to load listings.</li>';
@@ -221,7 +238,7 @@
         return;
       }
 
-      // Fetch applicant counts for all roles in one go
+      // Fetch applicant counts for all roles in one query
       const roleIds = data.map(r => r.id);
       const { data: countData } = await window.db
         .from('applications')
@@ -235,6 +252,12 @@
 
       data.forEach(role => {
         const count = countMap[role.id] || 0;
+
+        // Wrapper div so we can position the delete button absolutely over the card
+        const wrap = document.createElement('div');
+        wrap.className = 'role-card-wrap';
+        wrap.dataset.roleId = role.id;
+
         const li = document.createElement('li');
         li.innerHTML = `
           <h2>${role.name ?? '—'}</h2>
@@ -248,67 +271,34 @@
           <p class="status">👥 ${count} applicant${count !== 1 ? 's' : ''} — click to review</p>
         `;
         li.addEventListener('click', () => openDrawer(role));
-        list.appendChild(li);
+
+        // Delete button — sits on top of the card; stops click from opening drawer
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-delete-role';
+        delBtn.title = 'Delete role';
+        delBtn.innerHTML = '🗑';
+        delBtn.addEventListener('click', async e => {
+          e.stopPropagation();
+          delBtn.disabled = true;
+          await window.db.from('applications').delete().eq('role_id', role.id);
+          const { error } = await window.db.from('roles').delete().eq('id', role.id);
+          if (error) { alert('Failed to delete: ' + error.message); delBtn.disabled = false; return; }
+          wrap.classList.add('deleting');
+          setTimeout(() => {
+            wrap.remove();
+            if (!list.querySelector('.role-card-wrap')) {
+              list.innerHTML = '<li>No listings yet. Create one above!</li>';
+            }
+          }, 260);
+        });
+
+        wrap.appendChild(li);
+        wrap.appendChild(delBtn);
+        list.appendChild(wrap);
       });
-    })();
-
-    // ── Delete flow ──
-    function promptDelete(roleId, roleName, cardEl) {
-      pendingDeleteId   = roleId;
-      pendingDeleteCard = cardEl;
-      document.getElementById('confirmRoleName').textContent = roleName || 'this listing';
-      document.getElementById('confirmOverlay').classList.add('open');
-      document.getElementById('btnConfirmDelete').disabled = false;
     }
 
-    function cancelDelete() {
-      pendingDeleteId   = null;
-      pendingDeleteCard = null;
-      document.getElementById('confirmOverlay').classList.remove('open');
-    }
-
-    async function confirmDelete() {
-      if (!pendingDeleteId) return;
-
-      const btn = document.getElementById('btnConfirmDelete');
-      btn.disabled = true;
-      btn.textContent = 'Deleting…';
-
-      // Delete applications first (foreign key safety), then the role
-      await window.db.from('applications').delete().eq('role_id', pendingDeleteId);
-      const { error } = await window.db.from('roles').delete().eq('id', pendingDeleteId);
-
-      if (error) {
-        alert('Failed to delete: ' + error.message);
-        btn.disabled = false;
-        btn.textContent = 'Delete';
-        return;
-      }
-
-      // Animate card out, then remove from DOM
-      if (pendingDeleteCard) {
-        pendingDeleteCard.classList.add('deleting');
-        setTimeout(() => {
-          pendingDeleteCard.remove();
-          // Show empty state if no cards left
-          const grid = document.getElementById('roles-grid');
-          if (!grid.querySelector('.role-card')) {
-            grid.innerHTML = '<p>No listings yet. Create one above!</p>';
-          }
-        }, 280);
-      }
-
-      document.getElementById('confirmOverlay').classList.remove('open');
-      pendingDeleteId   = null;
-      pendingDeleteCard = null;
-    }
-
-    // Close confirm dialog on overlay click
-    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
-      if (e.target === this) cancelDelete();
-    });
-
-    /* ── Drawer ──────────────────────────────────────────── */
+    /* ── Drawer ── */
 
     function openDrawer(role) {
       document.getElementById('drawerRoleName').textContent = role.name ?? '—';
@@ -319,7 +309,6 @@
         '<div class="drawer-empty"><div class="icon">⏳</div>Loading applicants…</div>';
 
       document.getElementById('drawerShell').classList.add('open');
-      // Lock page scroll while drawer is open
       document.documentElement.style.overflow = 'hidden';
 
       loadApplicants(role.id);
@@ -330,15 +319,11 @@
       document.documentElement.style.overflow = '';
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-
-    /* ── Load & render applicants ────────────────────────── */
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        closeDrawer();
-        cancelDelete();
-      }
+      if (e.key === 'Escape') { closeDrawer(); }
     });
+
+    /* ── Load & render applicants ── */
 
     async function loadApplicants(roleId) {
       const body    = document.getElementById('drawerBody');
@@ -354,7 +339,6 @@
         body.innerHTML = `<div class="drawer-empty"><div class="icon">⚠️</div>Failed to load applicants.</div>`;
         return;
       }
-
       if (!data || data.length === 0) {
         countEl.textContent = '0 applicants';
         body.innerHTML = `
@@ -401,7 +385,7 @@
             <div class="applicant-name">${displayName}</div>
             ${subParts.length ? `<div class="applicant-sub">${subParts.join(' · ')}</div>` : ''}
             ${tagsHtml        ? `<div class="applicant-tags">${tagsHtml}</div>`            : ''}
-            ${p?.bio          ? `<div class="applicant-bio">${p.bio}</div>`                 : ''}
+            ${p?.bio          ? `<div class="applicant-bio">${p.bio}</div>`                : ''}
             ${portfolioHtml}
             <div class="status-row">
               <span class="status-badge ${statusClass}" id="badge-${app.id}">${app.status}</span>
@@ -420,7 +404,7 @@
       });
     }
 
-    /* ── Accept / reject ─────────────────────────────────── */
+    /* ── Accept / reject ── */
 
     async function updateStatus(appId, newStatus) {
       const acceptBtn = document.getElementById(`accept-${appId}`);
@@ -442,10 +426,8 @@
         return;
       }
 
-      badge.textContent  = newStatus;
-      badge.className    = `status-badge ${newStatus}`;
       badge.textContent = newStatus;
-      badge.className = `status-badge ${newStatus}`;
+      badge.className   = `status-badge ${newStatus}`;
     }
   </script>
 </body>
