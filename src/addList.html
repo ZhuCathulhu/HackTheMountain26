@@ -439,6 +439,10 @@
       try {
         const token = await auth0Client.getTokenSilently();
 
+        if (!currentUser) {
+          currentUser = await auth0Client.getUser();
+        }
+
         const res = await fetch(`${SUPABASE_URL}/rest/v1/roles`, {
           method: 'POST',
           headers: {
