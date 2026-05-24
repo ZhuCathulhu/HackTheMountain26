@@ -133,6 +133,9 @@ Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); })
   { id: 5, name: "Community Orchestra",  addr: "900 Boul. des Laurentides",  city: "St-Jérôme, QC", genre: "instrumental", level: "no experience",location: "venue",    uniform: "uniform provided",  lat: 45.7750, lng: -74.0020 },
 ];*/
 
+const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
+
 let roles = [];
 let nextId = 6;
 let activeId = null;
@@ -263,7 +266,10 @@ function render() {
     const div = document.createElement('div');
     div.className = 'card' + (role.id === activeId ? ' active' : '');
     div.setAttribute('role', 'listitem');
-    const isCustom = role.type === 'custom';
+    const isCustom   = role.type === 'custom';
+    const isOwn      = role.created_by === window.currentUser?.sub;
+    const hasApplied = window.appliedRoleIds?.has(role.id);
+
     div.innerHTML = `
       <div class="card-row1">
         <div class="pin-dot"></div>
@@ -279,16 +285,65 @@ function render() {
           <span class="tag-pill">${role.uniform}</span>
         ` : ''}
       </div>
-      <button class="card-remove" data-id="${role.id}" aria-label="Remove ${role.name}" title="Remove">×</button>
+      ${isOwn
+        ? `<button class="card-remove" data-id="${role.id}" aria-label="Remove ${role.name}" title="Remove">×</button>`
+        : `<button class="card-apply ${hasApplied ? 'applied' : ''}" data-id="${role.id}">
+             ${hasApplied ? 'Applied ✓' : 'Apply'}
+           </button>`
+      }
     `;
+
     div.addEventListener('click', (e) => {
-      if (e.target.closest('.card-remove')) return;
+      if (e.target.closest('.card-remove') || e.target.closest('.card-apply')) return;
       selectRole(role.id);
     });
-    div.querySelector('.card-remove').addEventListener('click', (e) => {
-      e.stopPropagation();
-      removeRole(role.id);
-    });
+
+    if (isOwn) {
+      div.querySelector('.card-remove').addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeRole(role.id);
+      });
+    } else {
+      div.querySelector('.card-apply').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        if (btn.classList.contains('applied') || btn.classList.contains('loading')) return;
+        btn.classList.add('loading');
+        btn.textContent = '…';
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {
+            method: 'POST',
+            headers: {
+              'apikey':        SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type':  'application/json',
+              'Prefer':        'return=minimal',
+            },
+            body: JSON.stringify({
+              role_id:      role.id,
+              applicant_id: window.currentUser.sub,
+              status:       'pending',
+            }),
+          });
+          if (res.ok || res.status === 409) { // 409 = already applied (unique constraint)
+            window.appliedRoleIds.add(role.id);
+            btn.classList.remove('loading');
+            btn.classList.add('applied');
+            btn.textContent = 'Applied ✓';
+          } else {
+            const err = await res.json();
+            console.error('Apply failed:', err);
+            btn.classList.remove('loading');
+            btn.textContent = 'Apply';
+          }
+        } catch (err) {
+          console.error('Apply error:', err);
+          btn.classList.remove('loading');
+          btn.textContent = 'Apply';
+        }
+      });
+    }
+
     cardsEl.appendChild(div);
   });
 
@@ -425,10 +480,21 @@ async function loadRoles() {
     }
 
     const user = await window.client.getUser();
-    //document.getElementById('user-email').textContent = user.email;
     window.currentUser = user;
     const token = await window.client.getTokenSilently();
     window.db.functions.setAuth(token);
+
+    // Pre-load the user's existing applications so cards render with correct state
+    window.appliedRoleIds = new Set();
+    try {
+      const appRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/applications?applicant_id=eq.${encodeURIComponent(user.sub)}&select=role_id`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      const apps = await appRes.json();
+      if (Array.isArray(apps)) apps.forEach(a => window.appliedRoleIds.add(a.role_id));
+    } catch (e) { console.warn('Could not load applications:', e.message); }
+
     loadRoles();
     document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
