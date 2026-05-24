@@ -108,13 +108,17 @@ const FILTER_DEFS = {
 const filters = {};
 Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); });
 
-const roles = [
-  { id: 1, name: "Tap Ensemble",        addr: "4205 Rue Jean-Talon Ouest", city: "Montréal, QC",  genre: "dance",        level: "intermediate",  location: "indoors",  uniform: "uniform required",  lat: 45.4960, lng: -73.6350 },
-  { id: 2, name: "Jazz Quartet",         addr: "3035 Boul. Le Carrefour",   city: "Laval, QC",     genre: "instrumental", level: "pro",           location: "venue",    uniform: "no uniform",        lat: 45.5580, lng: -73.7350 },
-  { id: 3, name: "Youth Theatre Troupe", addr: "1000 Rue Ste-Catherine",    city: "Longueuil, QC", genre: "theatre",      level: "beginner",      location: "indoors",  uniform: "uniform provided",  lat: 45.5350, lng: -73.5120 },
-  { id: 4, name: "Street Dance Crew",    addr: "3232 Boul. St-Charles",     city: "Kirkland, QC",  genre: "dance",        level: "novice",        location: "outdoors", uniform: "no uniform",        lat: 45.4490, lng: -73.8700 },
-  { id: 5, name: "Community Orchestra",  addr: "900 Boul. des Laurentides",  city: "St-Jérôme, QC", genre: "instrumental", level: "no experience", location: "venue",    uniform: "uniform provided",  lat: 45.7750, lng: -74.0020 },
-];
+/* ── Data ── */
+// Each role must have a value for every filter key so filtered() can test it.
+/*const roles = [
+  { id: 1, name: "Tap Ensemble",        addr: "4205 Rue Jean-Talon Ouest", city: "Montréal, QC",  genre: "dance",        level: "intermediate", location: "indoors",  uniform: "uniform required",  lat: 45.4960, lng: -73.6350 },
+  { id: 2, name: "Jazz Quartet",         addr: "3035 Boul. Le Carrefour",   city: "Laval, QC",     genre: "instrumental", level: "pro",          location: "venue",    uniform: "no uniform",        lat: 45.5580, lng: -73.7350 },
+  { id: 3, name: "Youth Theatre Troupe", addr: "1000 Rue Ste-Catherine",    city: "Longueuil, QC", genre: "theatre",      level: "beginner",     location: "indoors",  uniform: "uniform provided",  lat: 45.5350, lng: -73.5120 },
+  { id: 4, name: "Street Dance Crew",    addr: "3232 Boul. St-Charles",     city: "Kirkland, QC",  genre: "dance",        level: "novice",       location: "outdoors", uniform: "no uniform",        lat: 45.4490, lng: -73.8700 },
+  { id: 5, name: "Community Orchestra",  addr: "900 Boul. des Laurentides",  city: "St-Jérôme, QC", genre: "instrumental", level: "no experience",location: "venue",    uniform: "uniform provided",  lat: 45.7750, lng: -74.0020 },
+];*/
+
+let roles = [];
 let nextId = 6;
 let activeId = null;
 let searchVal = "";
@@ -173,7 +177,7 @@ function popupHtml(r) {
   `;
 }
 
-map.on('contextmenu', (e) => {
+map.on('contextmenu', async (e) => {
   const { lat, lng } = e.latlng;
   const id = nextId++;
   const role = {
@@ -337,11 +341,23 @@ document.getElementById('search').addEventListener('input', (e) => {
 
 /* ── Init ── */
 async function loadRoles() {
-  const { data, error } = await window.db.from('roles').select('*');
-  if (error) { console.error(error); return; }
-  roles = data;
-  nextId = Math.max(...roles.map(r => r.id), 5) + 1;
-  render();
+    try {
+    const { data, error } = await window.db.from('roles').select('*');
+    if (error) {
+      console.error('Supabase load failed:', error.message, '| details:', error.details, '| hint:', error.hint, '| code:', error.code);
+      return;
+    }
+    if (!data || data.length === 0) {
+      console.warn('Supabase returned no rows. Check RLS policies on the roles table (anon role needs SELECT permission).');
+      render();
+      return;
+    }
+    roles = data;
+    nextId = Math.max(...roles.map(r => r.id), 5) + 1;
+    render();
+  } catch (err) {
+    console.error('Unexpected error in loadRoles:', err);
+  }
 }
 </script>
 
@@ -372,7 +388,7 @@ async function loadRoles() {
     }
 
     const user = await window.client.getUser();
-    document.getElementById('user-email').textContent = user.email;
+    //document.getElementById('user-email').textContent = user.email;
   
     loadRoles();
   })();
