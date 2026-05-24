@@ -35,6 +35,9 @@
   body.applied {
   --page-bg: #FFA958;
 }
+body.profile {
+  --page-bg: #F5ECD5;
+}
 
   /* ── Header ── */
   header {
@@ -43,8 +46,8 @@
     top: 0; left: 0; right: 0;
     z-index: 1001;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  justify-content: flex-end;
     padding: 0 24px;
     background: var(--header-bg);
     color: white;
@@ -57,15 +60,18 @@
     color: var(--page-bg);
     letter-spacing: -1px;
     font-family: var(--font);
+    padding-right: 0px;
   }
 
   .logo-dot {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--page-bg);
-    flex-shrink: 0;
-  }
+  display: inline-block; /* Add this line to force HTML to respect the 44px size */
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--page-bg);
+  flex-shrink: 0;
+  margin-right: 20px;
+}
 
   header .right { display: flex; align-items: center; gap: 16px; }
 
