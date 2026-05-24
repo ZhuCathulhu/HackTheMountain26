@@ -3,97 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Listings – Performr</title>
+  <title>Applied – Performr</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="explore-layout applied">
+<body class="page-layout">
 
   <header>
-    <div class="right">
-      <span class="logo">performr</span>
-      <a href="profile.html" class="logo-dot"></a>
-    </div>
+    <img src="assets/performr.png" alt="Performr logo" class="logo" />
+    <a href="profile.html"></a>
   </header>
 
-  <div class="tab-bar">
-    <a href="explore.html"   class="tab-explore">Explore</a>
-    <a href="applied.html"   class="tab-applied">Applied</a>
-    <a href="listings.html"  class="tab-listings">My Listings</a>
-  </div>
+  <nav>
+    <a href="explore.html">Explore</a>
+    <a href="applied.html">Applied</a>
+    <a href="listings.html">My Listings</a>
+  </nav>
 
-  <main class="page">
-    <div class="section-header">
-      <h1>My Roles</h1>
-    </div>
-    <div class="roles-grid" id="roles-grid">
-      <p>Loading...</p>
-    </div>
+  <main>
+<div class="page-header">
+  <h1>Applied Roles</h1>
+</div>
+    <ul class="roles" id="roles-list">
+      <li>Loading…</li>
+    </ul>
   </main>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
   <script>
     (async () => {
-      const { createClient } = supabase;
-      window.db = createClient(
-        'https://golijzcjitljymhpjaur.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk'
-      );
-      window.client = await auth0.createAuth0Client({
-        domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
-        clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-        authorizationParams: { redirect_uri: location.origin },
-      });
- 
-      if (!(await window.client.isAuthenticated())) {
-        window.location.href = 'index.html';
-        return;
-      }
- 
-      const user = await window.client.getUser();
-      window.currentUser = user;
- 
-      // Fetch applications for this user, joining role details
+      if (!await initApp()) return;
+
       const { data, error } = await window.db
         .from('applications')
         .select('*, roles(*)')
-        .eq('applicant_id', user.sub);
- 
-      const grid = document.getElementById('roles-grid');
-      grid.innerHTML = '';
- 
-      if (error) {
-        console.error('Supabase error:', error.message, error.hint);
-        grid.innerHTML = '<p>Failed to load applications.</p>';
-        return;
-      }
- 
-      if (!data || data.length === 0) {
-        grid.innerHTML = "<p>You haven't applied to any roles yet.</p>";
-        return;
-      }
- 
-      data.forEach(application => {
-        const role = application.roles;
-        const card = document.createElement('div');
-        card.className = 'role-card';
-        card.innerHTML = `
+        .eq('applicant_id', window.currentUser.sub);
+
+      const list = document.getElementById('roles-list');
+      list.innerHTML = '';
+
+      if (error) { list.innerHTML = '<li>Failed to load applications.</li>'; return; }
+      if (!data?.length) { list.innerHTML = "<li>You haven't applied to any roles yet.</li>"; return; }
+
+      data.forEach(({ roles: role, status }) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
           <h2>${role.name}</h2>
-          <p class="card-address">${role.addr ? role.addr + ', ' : ''}${role.city}</p>
-          <div class="card-tags">
-            <span class="tag-pill">${role.genre}</span>
-            <span class="tag-pill">${role.level}</span>
-            <span class="tag-pill">${role.location}</span>
-            <span class="tag-pill">${role.uniform}</span>
-          </div>
-          <p class="card-desc">Status: <strong>${application.status}</strong></p>
+          <p>${role.addr ? role.addr + ', ' : ''}${role.city ?? ''}</p>
+          <footer>
+            ${[role.genre, role.level, role.location, role.uniform].filter(Boolean).map(t => `<span>${t}</span>`).join('')}
+          </footer>
+          <p class="status">Status: ${status}</p>
         `;
-        grid.appendChild(card);
+        list.appendChild(li);
       });
     })();
   </script>
-
 </body>
 </html>

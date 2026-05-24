@@ -1,209 +1,74 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Listings – Performr</title>
+  <title>Profile – Performr</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class = "profile">
+<body class="page-layout">
 
   <header>
-    <div class="right">
-      <span class="logo">performr</span>
-      <div class="logo-dot"></div>
-    </div>
+    <img src="assets/performr.png" alt="Performr logo" />
+    <a href="profile.html"></a>
   </header>
 
-  <div class="tab-bar">
-    <a href="explore.html"   class="tab-explore">Explore</a>
-    <a href="applied.html"   class="tab-applied">Applied</a>
-    <a href="listings.html"  class="tab-listings">My Listings</a>
+  <nav>
+    <a href="explore.html">Explore</a>
+    <a href="applied.html">Applied</a>
+    <a href="listings.html">My Listings</a>
     <button id="logout-btn">Logout</button>
-  </div>
-  
-  <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  
-  body { background: var(--page-bg); font-family: var(--font); }
-  .page {
-    padding: 32px 20px 60px;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-  }
-  .profile-container {
-    background: #fff9e7;;
-    border-radius: 18px;
-    padding: 36px 40px;
-    width: 100%;
-    max-width: 780px;
-  }
-  .profile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
-  }
-  .profile-header h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.5px;
-  }
-  .btn-edit {
-    background: #1A0A0A;
-    color: #fff;
-    border: none;
-    border-radius: 999px;
-    padding: 12px 26px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: var(--font);
-    cursor: pointer;
-  }
-  .btn-edit:hover { background: #3a1a1a; }
-  .profile-info {
-    display: flex;
-    gap: 32px;
-    margin-bottom: 32px;
-    align-items: flex-start;
-  }
-  .avatar-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  .avatar {
-    width: 180px;
-    height: 200px;
-    border-radius: 12px;
-    border-style: dashed;
-    border-width: 3px;
-    border-color:#520606;
-    background: #FFA958;
-  }
-  .change-link {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--brand);
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-family: var(--font);
-  }
-  .profile-details { flex: 1; }
-  .profile-name {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.4px;
-    margin-bottom: 12px;
-  }
-  .profile-name .pronouns {
-    font-weight: 400;
-    color: var(--text-muted);
-    font-size: 22px;
-  }
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  .tag {
-    background: var(--tag-bg);
-    color: var(--tag-text);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 5px 14px;
-    border-radius: 999px;
-  }
-  .bio-label {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .bio-text {
-    font-size: 14px;
-    line-height: 1.65;
-    color: #2a1a14;
-  }
-  .divider {
-    border: none;
-    border-top: 1.5px solid var(--border);
-    margin: 24px 0;
-  }
-  .section-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 16px;
-    letter-spacing: -0.3px;
-  }
-  .work-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-  .work-thumb {
-    aspect-ratio: 1;
-    background: #FFA958;
-    border-radius: 10px;
-    border-style: dashed;
-    border-width: 3px;
-    border-color:#520606;
-  }
-</style>
-<div class="page">
-  <div class="profile-container">
-    <div class="profile-header">
+  </nav>
+
+  <main>
+    <div class="page-header">
       <h1>My Profile</h1>
-      <button class="btn-edit">Edit Profile</button>
+      <button class="create">Edit Profile</button>
     </div>
-    <div class="profile-info">
-      <div class="avatar-wrap">
+
+    <article>
+      <div class="avatar-row">
         <div class="avatar"></div>
-        <button class="change-link">Change</button>
+        <button class="create" style="font-size:13px; padding:6px 16px;">Change photo</button>
       </div>
-      <div class="profile-details">
-        <div class="profile-name">Jane Doe <span class="pronouns">(she/her)</span></div>
-        <div class="tags">
-          <span class="tag-pill">Pianist</span>
-          <span class="tag-pill">Intermediate</span>
-          <span class="tag-pill">Has Car</span>
+
+      <div class="profile-body">
+        <h2>Jane Doe <small>(she/her)</small></h2>
+        <div class="pills">
+          <span class="on">Pianist</span>
+          <span class="on">Intermediate</span>
+          <span class="on">Has Car</span>
         </div>
-        <div class="bio-label">Bio</div>
-        <div class="bio-text">Second-year student looking to help out on indie sets or jam with local bands. Down for last-minute calls!</div>
+        <h3>Bio</h3>
+        <p>Second-year student looking to help out on indie sets or jam with local bands. Down for last-minute calls!</p>
       </div>
-    </div>
-    <hr class="divider">
-    <div class="section-title">My Work</div>
-    <div class="work-grid">
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-      <div class="work-thumb"></div>
-    </div>
-  </div>
-</div>
+    </article>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
-<script src="auth.js"></script>
-<script>
-  (async () => {
-    if (!await initApp()) return;
+    <hr>
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      window.client.logout({ logoutParams: { returnTo: window.location.origin } });
-    });
-  })();
-</script>
+    <h2>My Work</h2>
+    <ul class="work-grid">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    (async () => {
+      if (!await initApp()) return;
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        window.client.logout({ logoutParams: { returnTo: window.location.origin } });
+      });
+    })();
+  </script>
+</body>
+</html>

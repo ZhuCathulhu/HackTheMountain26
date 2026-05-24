@@ -1,381 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Explore – Performr</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore – Performr</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="explore-layout">
+<body class="explore">
 
 <header>
-  <div class="right">
-    <span class="logo">performr</span>
-    <a href="profile.html" class="logo-dot"></a>
-  </div>
+  <img src="assets/performr.png" alt="Performr logo" class="logo" />
+  <a href="profile.html"></a>
 </header>
 
-<div class="tab-bar">
-  <a href="explore.html" class="tab-explore tab-active-explore">Explore</a>
-  <a href="applied.html" class="tab-applied">Applied</a>
-  <a href="listings.html" class="tab-listings">My Listings</a>
-</div>
+<nav>
+  <a href="explore.html" class="active">Explore</a>
+  <a href="applied.html">Applied</a>
+  <a href="listings.html">My Listings</a>
+</nav>
 
-<div id="app">
+<main>
 
-  <!-- Sidebar -->
-  <div id="sidebar">
-
-    <div id="sidebar-top">
-      <div id="search-row">
-        <input id="search" type="text" placeholder="Search by name or city…" aria-label="Search roles" />
-        <button id="filter-btn" aria-expanded="false" aria-controls="filter-panel">
-          Filters
-          <span class="dot"></span>
-        </button>
-      </div>
+  <aside>
+    <div>
+      <input type="search" placeholder="Search by name or city…" aria-label="Search roles" />
+      <button id="filter-btn" aria-expanded="false" aria-controls="filters">Filters <span></span></button>
     </div>
 
-    <!-- Filter panel -->
-    <div id="filter-panel" role="region" aria-label="Filters">
-      <div class="filter-group">
-        <label>Genre</label>
-        <div class="filter-chips">
-          <button class="chip on" data-filter="genre" data-val="dance">Dance</button>
-          <button class="chip on" data-filter="genre" data-val="instrumental">Instrumental</button>
-          <button class="chip on" data-filter="genre" data-val="theatre">Theatre</button>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Level</label>
-        <div class="filter-chips">
-          <button class="chip on" data-filter="level" data-val="no experience">No experience</button>
-          <button class="chip on" data-filter="level" data-val="beginner">Beginner</button>
-          <button class="chip on" data-filter="level" data-val="novice">Novice</button>
-          <button class="chip on" data-filter="level" data-val="intermediate">Intermediate</button>
-          <button class="chip on" data-filter="level" data-val="pro">Pro</button>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Location</label>
-        <div class="filter-chips">
-          <button class="chip on" data-filter="location" data-val="indoors">Indoors</button>
-          <button class="chip on" data-filter="location" data-val="outdoors">Outdoors</button>
-          <button class="chip on" data-filter="location" data-val="venue">Venue</button>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Uniform</label>
-        <div class="filter-chips">
-          <button class="chip on" data-filter="uniform" data-val="no uniform">No uniform</button>
-          <button class="chip on" data-filter="uniform" data-val="uniform provided">Uniform provided</button>
-          <button class="chip on" data-filter="uniform" data-val="uniform required">Uniform required</button>
-        </div>
-      </div>
-      <div class="filter-actions">
-        <button class="clear-filters" id="clear-filters">Clear all filters</button>
-      </div>
-    </div>
+    <section id="filters" aria-label="Filters">
+      <fieldset>
+        <legend>Genre</legend>
+        <button class="chip on" data-filter="genre" data-val="dance">Dance</button>
+        <button class="chip on" data-filter="genre" data-val="instrumental">Instrumental</button>
+        <button class="chip on" data-filter="genre" data-val="theatre">Theatre</button>
+      </fieldset>
+      <fieldset>
+        <legend>Level</legend>
+        <button class="chip on" data-filter="level" data-val="no experience">No experience</button>
+        <button class="chip on" data-filter="level" data-val="beginner">Beginner</button>
+        <button class="chip on" data-filter="level" data-val="novice">Novice</button>
+        <button class="chip on" data-filter="level" data-val="intermediate">Intermediate</button>
+        <button class="chip on" data-filter="level" data-val="pro">Pro</button>
+      </fieldset>
+      <fieldset>
+        <legend>Location</legend>
+        <button class="chip on" data-filter="location" data-val="indoors">Indoors</button>
+        <button class="chip on" data-filter="location" data-val="outdoors">Outdoors</button>
+        <button class="chip on" data-filter="location" data-val="venue">Venue</button>
+      </fieldset>
+      <fieldset>
+        <legend>Uniform</legend>
+        <button class="chip on" data-filter="uniform" data-val="no uniform">No uniform</button>
+        <button class="chip on" data-filter="uniform" data-val="uniform provided">Uniform provided</button>
+        <button class="chip on" data-filter="uniform" data-val="uniform required">Uniform required</button>
+      </fieldset>
+      <button id="clear-filters">Clear all filters</button>
+    </section>
 
-    <div id="cards" role="list" aria-label="Role list"></div>
-    <div id="empty-state" aria-live="polite">
-      <p>📍</p>
-      <p>No roles match your filters.</p>
-    </div>
-  </div>
+    <ul aria-label="Role list" aria-live="polite"></ul>
+    <p hidden>No roles match your filters.</p>
+  </aside>
 
-  <!-- Map -->
-  <div id="map-wrap">
-    <div id="map" aria-label="Role locations map"></div>
-    <div id="rc-hint" role="status">📍 Pin added! Click it to see details.</div>
-  </div>
+  <div id="map" aria-label="Role locations map"></div>
+  <p id="hint" role="status">📍 Pin added! Click it to see details.</p>
 
-</div>
+</main>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-const FILTER_DEFS = {
-  genre:    ["dance", "instrumental", "theatre"],
-  level:    ["no experience", "beginner", "novice", "intermediate", "pro"],
-  location: ["indoors", "outdoors", "venue"],
-  uniform:  ["no uniform", "uniform provided", "uniform required"],
-};
-
-const filters = {};
-Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); });
-
-/* ── Data ── */
-// Each role must have a value for every filter key so filtered() can test it.
-/*const roles = [
-  { id: 1, name: "Tap Ensemble",        addr: "4205 Rue Jean-Talon Ouest", city: "Montréal, QC",  genre: "dance",        level: "intermediate", location: "indoors",  uniform: "uniform required",  lat: 45.4960, lng: -73.6350 },
-  { id: 2, name: "Jazz Quartet",         addr: "3035 Boul. Le Carrefour",   city: "Laval, QC",     genre: "instrumental", level: "pro",          location: "venue",    uniform: "no uniform",        lat: 45.5580, lng: -73.7350 },
-  { id: 3, name: "Youth Theatre Troupe", addr: "1000 Rue Ste-Catherine",    city: "Longueuil, QC", genre: "theatre",      level: "beginner",     location: "indoors",  uniform: "uniform provided",  lat: 45.5350, lng: -73.5120 },
-  { id: 4, name: "Street Dance Crew",    addr: "3232 Boul. St-Charles",     city: "Kirkland, QC",  genre: "dance",        level: "novice",       location: "outdoors", uniform: "no uniform",        lat: 45.4490, lng: -73.8700 },
-  { id: 5, name: "Community Orchestra",  addr: "900 Boul. des Laurentides",  city: "St-Jérôme, QC", genre: "instrumental", level: "no experience",location: "venue",    uniform: "uniform provided",  lat: 45.7750, lng: -74.0020 },
-];*/
-
-let roles = [];
-let nextId = 6;
-let activeId = null;
-let searchVal = "";
-
-const map = L.map('map');
-map.zoomControl.remove();
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors'
-}).addTo(map);
-
-map.setView([45.530, -73.620], 11);
-
-navigator.geolocation.getCurrentPosition(
-  ({ coords }) => {
-    const { latitude, longitude, accuracy } = coords;
-    map.setView([latitude, longitude], 13);
-    L.marker([latitude, longitude])
-      .addTo(map)
-      .bindPopup(`<strong>You are here</strong><br><small>±${Math.round(accuracy)} m accuracy</small>`)
-      .openPopup();
-    L.circle([latitude, longitude], { radius: accuracy, color: '#ED6E1C', fillColor: '#ED6E1C', fillOpacity: 0.08, weight: 1 }).addTo(map);
-  },
-  () => {},
-  { enableHighAccuracy: true, timeout: 10000 }
-);
-
-function makeIcon(color) {
-  return L.divIcon({
-    className: '',
-    html: `<svg width="15" height="15" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="7.5" cy="7.5" r="6.5" fill="${color}" stroke="#FFC440" stroke-width="1.5"/>
-    </svg>`,
-    iconSize: [15, 15],
-    iconAnchor: [7, 7],
-    popupAnchor: [0, -10]
-  });
-}
-
-const markerMap = {};
-
-function addRoleMarker(role) {
-  const color = role.type === 'custom' ? '#8B5CF6' : '#ED6E1C';
-  const m = L.marker([role.lat, role.lng], { icon: makeIcon(color) }).addTo(map);
-  m.bindPopup(popupHtml(role));
-  m.on('click', () => selectRole(role.id));
-  markerMap[role.id] = m;
-}
-
-function popupHtml(r) {
-  const isCustom = r.type === 'custom';
-  return `
-    <strong>${r.name}</strong><br>
-    ${r.addr ? r.addr + '<br>' : ''}
-    <small>${r.city}</small>
-    ${!isCustom ? `<br><small>${r.genre} · ${r.level} · ${r.location}</small>` : ''}
-  `;
-}
-
-map.on('contextmenu', async (e) => {
-  const { lat, lng } = e.latlng;
-  const id = nextId++;
-  const role = {
-    id, name: `Custom pin #${id - 5}`, addr: '',
-    city: `${lat.toFixed(4)}° N, ${Math.abs(lng).toFixed(4)}° W`,
-    type: 'custom',
-    genre: FILTER_DEFS.genre[0], level: FILTER_DEFS.level[0],
-    location: FILTER_DEFS.location[0], uniform: FILTER_DEFS.uniform[0],
-    lat, lng,
-  };
-  roles.push(role);
-
-  const { data, error } = await window.db.from('roles').insert([{
-    id: role.id,
-    name: role.name,
-    addr: role.addr,
-    city: role.city,
-    genre: role.genre,
-    level: role.level,
-    location: role.location,
-    uniform: role.uniform,
-    lat: role.lat,
-    lng: role.lng,
-    created_by: (await window.client.getUser()).sub,
-  }]).select().single();
-
-  if (!error) role.id = data.id;
-
-  addRoleMarker(role);                       // existing lines below
-  showHint();
-  render();
-  selectRole(id);
-});
-
-function showHint() {
-  const h = document.getElementById('rc-hint');
-  h.classList.add('show');
-  setTimeout(() => h.classList.remove('show'), 2800);
-}
-
-function filtered() {
-  return roles.filter(role => {
-    for (const key of Object.keys(FILTER_DEFS)) {
-      if (!filters[key].has(role[key])) return false;
-    }
-    const q = searchVal.toLowerCase();
-    if (q && !role.name.toLowerCase().includes(q) && !role.city.toLowerCase().includes(q)) return false;
-    return true;
-  });
-}
-
-function render() {
-  const list = filtered();
-
-  Object.values(markerMap).forEach(m => map.removeLayer(m));
-  Object.keys(markerMap).forEach(k => delete markerMap[k]);
-  list.forEach(role => addRoleMarker(role));
-  if (activeId && markerMap[activeId]) markerMap[activeId].openPopup();
-
-  const cardsEl = document.getElementById('cards');
-  const emptyEl = document.getElementById('empty-state');
-  cardsEl.innerHTML = '';
-  emptyEl.style.display = list.length === 0 ? 'block' : 'none';
-
-  list.forEach(role => {
-    const div = document.createElement('div');
-    div.className = 'card' + (role.id === activeId ? ' active' : '');
-    div.setAttribute('role', 'listitem');
-    const isCustom = role.type === 'custom';
-    div.innerHTML = `
-      <div class="card-row1">
-        <div class="pin-dot"></div>
-        <div class="card-name">${role.name}</div>
-        ${isCustom ? '<span class="card-type-tag">custom</span>' : ''}
-      </div>
-      <div class="card-addr">${role.addr ? role.addr + ', ' : ''}${role.city}</div>
-      <div class="card-footer">
-        ${!isCustom ? `
-          <span class="tag-pill">${role.genre}</span>
-          <span class="tag-pill">${role.level}</span>
-          <span class="tag-pill">${role.location}</span>
-          <span class="tag-pill">${role.uniform}</span>
-        ` : ''}
-      </div>
-      <button class="card-remove" data-id="${role.id}" aria-label="Remove ${role.name}" title="Remove">×</button>
-    `;
-    div.addEventListener('click', (e) => {
-      if (e.target.closest('.card-remove')) return;
-      selectRole(role.id);
-    });
-    div.querySelector('.card-remove').addEventListener('click', (e) => {
-      e.stopPropagation();
-      removeRole(role.id);
-    });
-    cardsEl.appendChild(div);
-  });
-
-  updateFilterBtnState();
-}
-
-function selectRole(id) {
-  activeId = (activeId === id) ? null : id;
-  render();
-  if (activeId && markerMap[activeId]) {
-    map.panTo(markerMap[activeId].getLatLng(), { animate: true });
-    markerMap[activeId].openPopup();
-    const card = document.querySelector('.card.active');
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-}
-
-function removeRole(id) {
-  const idx = roles.findIndex(r => r.id === id);
-  if (idx !== -1) roles.splice(idx, 1);
-  if (activeId === id) activeId = null;
-  render();
-}
-
-const filterBtn = document.getElementById('filter-btn');
-const filterPanel = document.getElementById('filter-panel');
-
-filterBtn.addEventListener('click', () => {
-  const open = filterPanel.classList.toggle('open');
-  filterBtn.classList.toggle('active', open);
-  filterBtn.setAttribute('aria-expanded', open);
-});
-
-document.querySelectorAll('.chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    const f = chip.dataset.filter;
-    const v = chip.dataset.val;
-    if (filters[f].has(v)) {
-      if (filters[f].size === 1) return;
-      filters[f].delete(v);
-      chip.classList.remove('on');
-    } else {
-      filters[f].add(v);
-      chip.classList.add('on');
-    }
-    render();
-  });
-});
-
-document.getElementById('clear-filters').addEventListener('click', () => {
-  Object.keys(FILTER_DEFS).forEach(k => { filters[k] = new Set(FILTER_DEFS[k]); });
-  document.querySelectorAll('.chip').forEach(c => c.classList.add('on'));
-  render();
-});
-
-function updateFilterBtnState() {
-  const allSelected = Object.keys(FILTER_DEFS).every(
-    k => filters[k].size === FILTER_DEFS[k].length
-  );
-  filterBtn.classList.toggle('has-filters', !allSelected);
-}
-
-document.getElementById('search').addEventListener('input', (e) => {
-  searchVal = e.target.value;
-  render();
-});
-
-/* ── Init ── */
-async function loadRoles() {
-    try {
-    const { data, error } = await window.db.from('roles').select('*');
-
-    if (error) {
-      console.error('Supabase load failed:', error.message, '| details:', error.details, '| hint:', error.hint, '| code:', error.code);
-      return;
-    }
-    if (!data || data.length === 0) {
-      console.warn('Supabase returned no rows. Check RLS policies on the roles table (anon role needs SELECT permission).');
-      render();
-      return;
-    }
-    roles = data;
-    nextId = Math.max(...roles.map(r => r.id), 5) + 1;
-    render();
-  } catch (err) {
-    console.error('Unexpected error in loadRoles:', err);
-  }
-}
-</script>
-
-<!--SDKs first, then init-->
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
-<!--For Supabase Database-->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
 <script src="auth.js"></script>
-<script>
-  (async () => {
-    if (!await initApp()) return;
-
-    // explore-specific logic
-    loadRoles();
-  })();
-</script>
+<script src="explore.js"></script>
 </body>
 </html>
