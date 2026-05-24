@@ -365,7 +365,12 @@
       auth0Client = await auth0.createAuth0Client({
         domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
         clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-        authorizationParams: { redirect_uri: location.origin },
+        authorizationParams: {
+          redirect_uri: location.origin,
+          audience: 'https://performr.api',
+        },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
       });
 
       if (!(await auth0Client.isAuthenticated())) {
@@ -438,6 +443,8 @@
 
       try {
         const token = await auth0Client.getTokenSilently();
+        console.log('TOKEN:', token);
+        console.log('PARTS:', token.split('.').length);
 
         if (!currentUser) {
           currentUser = await auth0Client.getUser();

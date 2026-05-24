@@ -44,7 +44,11 @@
       window.client = await auth0.createAuth0Client({
         domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
         clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-        authorizationParams: { redirect_uri: location.origin },
+        authorizationParams: { redirect_uri: location.origin,
+          audience: 'https://performr.api',
+        },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
       });
  
       if (!(await window.client.isAuthenticated())) {

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-store" />
 <title>Explore – Performr</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -41,44 +42,74 @@
 
     <!-- Filter panel -->
     <div id="filter-panel" role="region" aria-label="Filters">
-      <div class="filter-group">
-        <label>Genre</label>
-        <div class="filter-chips">
-          <button class="chip on" data-filter="genre" data-val="dance">Dance</button>
-          <button class="chip on" data-filter="genre" data-val="instrumental">Instrumental</button>
-          <button class="chip on" data-filter="genre" data-val="theatre">Theatre</button>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Level</label>
-        <div class="filter-chips">
-          <button class="chip on" data-filter="level" data-val="no experience">No experience</button>
-          <button class="chip on" data-filter="level" data-val="beginner">Beginner</button>
-          <button class="chip on" data-filter="level" data-val="novice">Novice</button>
-          <button class="chip on" data-filter="level" data-val="intermediate">Intermediate</button>
-          <button class="chip on" data-filter="level" data-val="pro">Pro</button>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Location</label>
-        <div class="filter-chips">
-          <button class="chip on" data-filter="location" data-val="indoors">Indoors</button>
-          <button class="chip on" data-filter="location" data-val="outdoors">Outdoors</button>
-          <button class="chip on" data-filter="location" data-val="venue">Venue</button>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Uniform</label>
-        <div class="filter-chips">
-          <button class="chip on" data-filter="uniform" data-val="no uniform">No uniform</button>
-          <button class="chip on" data-filter="uniform" data-val="uniform provided">Uniform provided</button>
-          <button class="chip on" data-filter="uniform" data-val="uniform required">Uniform required</button>
-        </div>
-      </div>
-      <div class="filter-actions">
-        <button class="clear-filters" id="clear-filters">Clear all filters</button>
-      </div>
+  <div class="filter-group">
+    <label>Genre</label>
+    <div class="filter-chips">
+      <button class="chip on" data-filter="genre" data-val="dance">Dance</button>
+      <button class="chip on" data-filter="genre" data-val="instrumental">Instrumental</button>
+      <button class="chip on" data-filter="genre" data-val="theatre">Theatre</button>
+      <button class="chip on" data-filter="genre" data-val="jazz">Jazz</button>
+      <button class="chip on" data-filter="genre" data-val="hip-hop">Hip-Hop</button>
+      <button class="chip on" data-filter="genre" data-val="ballet">Ballet</button>
+      <button class="chip on" data-filter="genre" data-val="contemporary">Contemporary</button>
+      <button class="chip on" data-filter="genre" data-val="latin">Latin</button>
+      <button class="chip on" data-filter="genre" data-val="tap">Tap</button>
+      <button class="chip on" data-filter="genre" data-val="musical theatre">Musical Theatre</button>
+      <button class="chip on" data-filter="genre" data-val="pop">Pop</button>
+      <button class="chip on" data-filter="genre" data-val="r&b">R&B</button>
+      <button class="chip on" data-filter="genre" data-val="folk">Folk</button>
+      <button class="chip on" data-filter="genre" data-val="classical">Classical</button>
+      <button class="chip on" data-filter="genre" data-val="other">Other</button>
     </div>
+  </div>
+  <div class="filter-group">
+    <label>Level</label>
+    <div class="filter-chips">
+      <button class="chip on" data-filter="level" data-val="no experience">No experience</button>
+      <button class="chip on" data-filter="level" data-val="beginner">Beginner</button>
+      <button class="chip on" data-filter="level" data-val="novice">Novice</button>
+      <button class="chip on" data-filter="level" data-val="intermediate">Intermediate</button>
+      <button class="chip on" data-filter="level" data-val="advanced">Advanced</button>
+      <button class="chip on" data-filter="level" data-val="pro">Pro</button>
+      <button class="chip on" data-filter="level" data-val="professional">Professional</button>
+      <button class="chip on" data-filter="level" data-val="any level">Any Level</button>
+    </div>
+  </div>
+  <div class="filter-group">
+    <label>Location</label>
+    <div class="filter-chips">
+      <button class="chip on" data-filter="location" data-val="indoors">Indoors</button>
+      <button class="chip on" data-filter="location" data-val="outdoors">Outdoors</button>
+      <button class="chip on" data-filter="location" data-val="venue">Venue</button>
+      <button class="chip on" data-filter="location" data-val="indoor studio">Indoor Studio</button>
+      <button class="chip on" data-filter="location" data-val="outdoor stage">Outdoor Stage</button>
+      <button class="chip on" data-filter="location" data-val="theatre">Theatre</button>
+      <button class="chip on" data-filter="location" data-val="club / venue">Club / Venue</button>
+      <button class="chip on" data-filter="location" data-val="street / public">Street / Public</button>
+      <button class="chip on" data-filter="location" data-val="private event">Private Event</button>
+      <button class="chip on" data-filter="location" data-val="remote / virtual">Remote / Virtual</button>
+      <button class="chip on" data-filter="location" data-val="tbd">TBD</button>
+    </div>
+  </div>
+  <div class="filter-group">
+    <label>Uniform</label>
+    <div class="filter-chips">
+      <button class="chip on" data-filter="uniform" data-val="no uniform">No uniform</button>
+      <button class="chip on" data-filter="uniform" data-val="uniform provided">Uniform provided</button>
+      <button class="chip on" data-filter="uniform" data-val="uniform required">Uniform required</button>
+      <button class="chip on" data-filter="uniform" data-val="black attire">Black attire</button>
+      <button class="chip on" data-filter="uniform" data-val="costume provided">Costume provided</button>
+      <button class="chip on" data-filter="uniform" data-val="bring your own">Bring your own</button>
+      <button class="chip on" data-filter="uniform" data-val="casual">Casual</button>
+      <button class="chip on" data-filter="uniform" data-val="formal">Formal</button>
+      <button class="chip on" data-filter="uniform" data-val="none">None</button>
+    </div>
+  </div>
+  <div class="filter-actions">
+    <button class="clear-filters" id="clear-filters">Clear all filters</button>
+  </div>
+</div>
+
 
     <div id="cards" role="list" aria-label="Role list"></div>
     <div id="empty-state" aria-live="polite">
@@ -98,10 +129,10 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const FILTER_DEFS = {
-  genre:    ["dance", "instrumental", "theatre"],
-  level:    ["no experience", "beginner", "novice", "intermediate", "pro"],
-  location: ["indoors", "outdoors", "venue"],
-  uniform:  ["no uniform", "uniform provided", "uniform required"],
+  genre:    ["dance", "instrumental", "theatre", "jazz", "hip-hop", "ballet", "contemporary", "latin", "tap", "musical theatre", "pop", "r&b", "folk", "classical", "other"],
+  level:    ["no experience", "beginner", "novice", "intermediate", "advanced", "pro", "professional", "any level"],
+  location: ["indoors", "outdoors", "venue", "indoor studio", "outdoor stage", "theatre", "club / venue", "street / public", "private event", "remote / virtual", "tbd"],
+  uniform:  ["no uniform", "uniform provided", "uniform required", "black attire", "costume provided", "bring your own", "casual", "formal", "none"],
 };
 
 const filters = {};
@@ -159,12 +190,14 @@ function makeIcon(color) {
 const markerMap = {};
 
 function addRoleMarker(role) {
+  if (role.lat == null || role.lng == null) return;
   const color = role.type === 'custom' ? '#8B5CF6' : '#ED6E1C';
   const m = L.marker([role.lat, role.lng], { icon: makeIcon(color) }).addTo(map);
   m.bindPopup(popupHtml(role));
   m.on('click', () => selectRole(role.id));
   markerMap[role.id] = m;
 }
+
 
 function popupHtml(r) {
   const isCustom = r.type === 'custom';
@@ -205,7 +238,7 @@ map.on('contextmenu', async (e) => {
 
   if (!error) role.id = data.id;
 
-  addRoleMarker(role);                       // existing lines below
+  addRoleMarker(role);                       
   showHint();
   render();
   selectRole(id);
@@ -340,7 +373,12 @@ document.getElementById('search').addEventListener('input', (e) => {
 
 /* ── Init ── */
 async function loadRoles() {
-    try {
+  try {
+    roles = []; // ← add this line at the top
+    Object.values(markerMap).forEach(m => map.removeLayer(m));
+    Object.keys(markerMap).forEach(k => delete markerMap[k]);
+    activeId = null;
+
     const { data, error } = await window.db.from('roles').select('*');
 
     if (error) {
@@ -352,7 +390,13 @@ async function loadRoles() {
       render();
       return;
     }
-    roles = data;
+    roles = data.map(r => ({
+      ...r,
+      genre:    (r.genre    ?? '').toLowerCase(),
+      level:    (r.level    ?? '').toLowerCase(),
+      location: (r.location ?? '').toLowerCase(),
+      uniform:  (r.uniform  ?? '').toLowerCase(),
+    }));
     nextId = Math.max(...roles.map(r => r.id), 5) + 1;
     render();
   } catch (err) {
@@ -379,7 +423,11 @@ async function loadRoles() {
     window.client = await auth0.createAuth0Client({
       domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
       clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
-      authorizationParams: { redirect_uri: location.origin },
+      authorizationParams: { redirect_uri: location.origin,
+        audience: 'https://performr.api',
+      },
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true,
     });
 
     if (!(await window.client.isAuthenticated())) {
@@ -393,6 +441,11 @@ async function loadRoles() {
     const token = await window.client.getTokenSilently();
     window.db.functions.setAuth(token);
     loadRoles();
+    document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      loadRoles();
+    }
+  });
   })();
 </script>
 </body>
