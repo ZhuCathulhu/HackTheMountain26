@@ -1,1 +1,2 @@
-# HackTheMountain26
+# PERFORMR
+A project for Hack the Mountain 2026.
