@@ -3,28 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Profile – Performr</title>
+  <title>Profile – Performr</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="profile">
+<body class="page-layout">
 
   <header>
-    <div class="right">
-      <span class="logo">performr</span>
-      <div class="logo-dot"></div>
-    </div>
+    <img src="assets/performr.png" alt="Performr logo" />
+    <a href="profile.html"></a>
   </header>
 
-  <div class="tab-bar">
-    <a href="explore.html"  class="tab-explore">Explore</a>
-    <a href="applied.html"  class="tab-applied">Applied</a>
-    <a href="listings.html" class="tab-listings">My Listings</a>
+  <nav>
+    <a href="explore.html">Explore</a>
+    <a href="applied.html">Applied</a>
+    <a href="listings.html">My Listings</a>
     <button id="logout-btn">Logout</button>
-  </div>
+  </nav>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -328,68 +324,40 @@
         <button class="btn-edit">Edit Profile</button>
       </div>
 
-      <!-- Populated by JS -->
-      <div class="profile-info" id="profile-info">
-        <div class="avatar-wrap">
-          <div class="avatar" id="avatar-el"></div>
-          <button class="change-link">Change</button>
-        </div>
-        <div class="profile-details" id="profile-details">
-          <div class="profile-name" id="profile-name">—</div>
-          <div class="profile-email" id="profile-email"></div>
-          <div class="profile-location" id="profile-location"></div>
-          <div class="tags" id="profile-tags"></div>
-          <div class="bio-label">Bio</div>
-          <div id="profile-bio" class="bio-empty">No bio yet.</div>
-          <div id="portfolio-wrap" style="margin-top:12px; display:none;">
-            <a id="portfolio-link" class="portfolio-link" href="#" target="_blank" rel="noopener">🔗 Portfolio</a>
-          </div>
-        </div>
+    <article>
+      <div class="avatar-row">
+        <div id="avatar-el" class="avatar"></div>
+        <button class="create" style="font-size:13px; padding:6px 16px;">Change photo</button>
       </div>
 
-      <hr class="divider">
-      <div class="section-title">My Work</div>
-      <div class="work-grid">
-        <div class="work-thumb"></div>
-        <div class="work-thumb"></div>
-        <div class="work-thumb"></div>
-        <div class="work-thumb"></div>
-        <div class="work-thumb"></div>
-        <div class="work-thumb"></div>
+      <div class="profile-body">
+        <h2 id="profile-name"> <small id="profile-email"></small></h2>
+        <p id="profile-location" style="font-size:13px; color:#460000; margin-bottom:8px;"></p>
+        <div class="pills" id="profile-tags"></div>
+        <h3>Bio</h3>
+        <p id="profile-bio"></p>
+        <p id="portfolio-wrap" style="display:none; margin-top:12px;">
+          <a id="portfolio-link" href="#" target="_blank" rel="noopener"
+             style="font-size:13px; font-weight:600; color:#460000;">🔗 Portfolio</a>
+        </p>
       </div>
+    </article>
 
-    </div>
-  </div>
+    <hr>
 
-  <!-- ── Plant Widget ── -->
-  <div class="plant-widget" id="plantWidget" style="display:none">
-    <div class="plant-bubble" id="plantBubble">your garden 🌱</div>
-    <div class="plant-toggle" id="plantToggle" onclick="togglePlantDrawer()">
-      <svg id="plantMiniSvg" width="56" height="64" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"></svg>
-      <div class="plant-count-badge" id="plantCountBadge">0 applied</div>
-    </div>
-  </div>
+    <h2>My Work</h2>
+    <ul class="work-grid">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </main>
 
-  <div class="plant-drawer" id="plantDrawer">
-    <div class="plant-drawer-header">
-      <span class="plant-drawer-title">your performr garden</span>
-      <button class="plant-drawer-close" onclick="togglePlantDrawer()">✕</button>
-    </div>
-    <div class="plant-stage-row">
-      <div class="plant-svg-wrap">
-        <svg id="plantMainSvg" width="100" height="120" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"></svg>
-      </div>
-      <div class="plant-text">
-        <div class="plant-stage-name" id="plantStageName">A blank pot</div>
-        <div class="plant-stage-desc" id="plantStageDesc">Nothing's growing yet. Your plant is judging you silently.</div>
-      </div>
-    </div>
-    <div class="plant-progress-track">
-      <div class="plant-progress-bar" id="plantBar" style="width:0%"></div>
-    </div>
-    <div class="plant-progress-label" id="plantProgressLabel">Apply to a role to wake it up</div>
-  </div>
-
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
@@ -399,13 +367,12 @@
     function addTag(container, text) {
       if (!text) return;
       const span = document.createElement('span');
-      span.className = 'tag-pill';
+      span.className = 'on'; // .pills span.on = active pill style
       span.textContent = cap(text);
       container.appendChild(span);
     }
 
     (async () => {
-      // Auth
       const client = await auth0.createAuth0Client({
         domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
         clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
@@ -440,36 +407,28 @@
       const rows = await res.json();
       const profile = rows?.[0] ?? null;
 
-      // Populate name
-      const nameEl = document.getElementById('profile-name');
-      nameEl.textContent = profile?.display_name || user.name || user.email;
+      // Name
+      document.getElementById('profile-name').childNodes[0].textContent =
+        (profile?.display_name || user.name || user.email) + ' ';
 
-      // Email
-      const emailEl = document.getElementById('profile-email');
-      emailEl.textContent = profile?.email || user.email || '';
+      // Email shown as subtitle
+      document.getElementById('profile-email').textContent =
+        profile?.email || user.email || '';
 
       // Location
       const locEl = document.getElementById('profile-location');
-      if (profile?.location) {
-        locEl.textContent = '📍 ' + profile.location;
-      }
+      if (profile?.location) locEl.textContent = '📍 ' + profile.location;
 
-      // Tags: discipline, discipline_detail, role, org_user
+      // Tags
       const tagsEl = document.getElementById('profile-tags');
-      if (profile?.discipline_detail) {
-        addTag(tagsEl, profile.discipline_detail);
-      } else if (profile?.discipline) {
-        addTag(tagsEl, profile.discipline);
-      }
-      if (profile?.role) addTag(tagsEl, profile.role);
+      if (profile?.discipline_detail) addTag(tagsEl, profile.discipline_detail);
+      else if (profile?.discipline)   addTag(tagsEl, profile.discipline);
+      if (profile?.role)     addTag(tagsEl, profile.role);
       if (profile?.org_user) addTag(tagsEl, profile.org_user);
 
       // Bio
       const bioEl = document.getElementById('profile-bio');
-      if (profile?.bio) {
-        bioEl.textContent = profile.bio;
-        bioEl.className = 'bio-text';
-      }
+      if (profile?.bio) bioEl.textContent = profile.bio;
 
       // Portfolio
       if (profile?.portfolio_url) {
@@ -479,7 +438,7 @@
         wrap.style.display = 'block';
       }
 
-      // Avatar: use Auth0 picture if available
+      // Avatar
       if (user.picture) {
         const avatarEl = document.getElementById('avatar-el');
         const img = document.createElement('img');
@@ -683,6 +642,5 @@
       document.getElementById('plantDrawer').classList.toggle('open', drawerOpen);
     }
   </script>
-
 </body>
 </html>

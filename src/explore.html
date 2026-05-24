@@ -1,43 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Cache-Control" content="no-store" />
-<title>Explore – Performr</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css"/>
+  <title>Explore – Performr</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="explore-layout">
+<body class="explore">
 
 <header>
-  <div class="right">
-    <span class="logo">performr</span>
-    <a href="profile.html" class="logo-dot"></a>
-  </div>
+  <img src="assets/performr.png" alt="Performr logo" class="logo" />
+  <a href="profile.html"></a>
 </header>
 
-<div class="tab-bar">
-  <a href="explore.html" class="tab-explore tab-active-explore">Explore</a>
-  <a href="applied.html" class="tab-applied">Applied</a>
-  <a href="listings.html" class="tab-listings">My Listings</a>
-</div>
+<nav>
+  <a href="explore.html" class="active">Explore</a>
+  <a href="applied.html">Applied</a>
+  <a href="listings.html">My Listings</a>
+</nav>
 
-<div id="app">
+<main>
 
-  <!-- Sidebar -->
-  <div id="sidebar">
-
-    <div id="sidebar-top">
-      <div id="search-row">
-        <input id="search" type="text" placeholder="Search by name or city…" aria-label="Search roles" />
-        <button id="filter-btn" aria-expanded="false" aria-controls="filter-panel">
-          Filters
-          <span class="dot"></span>
-        </button>
-      </div>
+  <aside>
+    <div>
+      <input type="search" id="search" placeholder="Search by name or city…" aria-label="Search roles" />
+      <button id="filter-btn" aria-expanded="false" aria-controls="filters">Filters <span></span></button>
     </div>
 
     <!-- Filter panel -->
@@ -111,20 +100,14 @@
 </div>
 
 
-    <div id="cards" role="list" aria-label="Role list"></div>
-    <div id="empty-state" aria-live="polite">
-      <p>📍</p>
-      <p>No roles match your filters.</p>
-    </div>
-  </div>
+    <div id="cards" role="list" aria-label="Role list" aria-live="polite"></div>
+    <p id="empty-state" style="display:none; padding:40px 24px; text-align:center; color:#460000; font-size:13px; opacity:0.6;">No roles match your filters.</p>
+  </aside>
 
-  <!-- Map -->
-  <div id="map-wrap">
-    <div id="map" aria-label="Role locations map"></div>
-    <div id="rc-hint" role="status">📍 Pin added! Click it to see details.</div>
-  </div>
+  <div id="map" aria-label="Role locations map"></div>
+  <p id="rc-hint" role="status">📍 Pin added! Click it to see details.</p>
 
-</div>
+</main>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
@@ -466,8 +449,6 @@ async function loadRoles() {
 <!--For Supabase Database-->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
 <script src="auth.js"></script>
 <script>
   (async () => {

@@ -5,263 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Listings – Performr</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css"/>
-  <style>
-    /* ── Applicant Drawer ── */
-    .drawer-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
-      z-index: 2000;
-      backdrop-filter: blur(2px);
-    }
-    .drawer-overlay.open { display: block; }
-
-    .drawer {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 420px;
-      max-width: 100vw;
-      background: #FAFAE8;
-      z-index: 2001;
-      display: flex;
-      flex-direction: column;
-      transform: translateX(100%);
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-      border-left: 2px solid #e8e4de;
-    }
-    .drawer.open { transform: translateX(0); }
-
-    .drawer-header {
-      padding: 20px 20px 16px;
-      border-bottom: 1px solid #e8e4de;
-      background: #320303;
-      color: #fff;
-    }
-    .drawer-header-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .drawer-role-name {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      margin-bottom: 6px;
-      color: #fff;
-    }
-    .drawer-role-meta {
-      font-size: 13px;
-      color: rgba(255,255,255,0.65);
-    }
-    .drawer-close {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      border-radius: 50%;
-      width: 32px; height: 32px;
-      cursor: pointer;
-      font-size: 18px;
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.15s;
-    }
-    .drawer-close:hover { background: rgba(255,255,255,0.25); }
-
-    .drawer-count {
-      margin-top: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.8);
-    }
-
-    .drawer-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .drawer-body::-webkit-scrollbar { width: 4px; }
-    .drawer-body::-webkit-scrollbar-thumb { background: #e8e4de; border-radius: 2px; }
-
-    .applicant-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
-      border: 1.5px solid #e8e4de;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-    }
-
-    .applicant-avatar {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      background: #FFA958;
-      border: 2px solid #460000;
-      flex-shrink: 0;
-      object-fit: cover;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-      font-weight: 700;
-      color: #460000;
-      overflow: hidden;
-    }
-    .applicant-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-    .applicant-info { flex: 1; min-width: 0; }
-    .applicant-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: #1A0A0A;
-      margin-bottom: 2px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .applicant-sub {
-      font-size: 12px;
-      color: #8A8178;
-      margin-bottom: 8px;
-    }
-    .applicant-tags {
-      display: flex; flex-wrap: wrap; gap: 5px;
-      margin-bottom: 10px;
-    }
-    .applicant-bio {
-      font-size: 12.5px;
-      color: #4a3a34;
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .status-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid #f0ece8;
-    }
-    .status-badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 999px;
-      text-transform: capitalize;
-    }
-    .status-badge.pending  { background: #F5ECD5; color: #7a5c00; }
-    .status-badge.accepted { background: #d4f0e3; color: #1a5c38; }
-    .status-badge.rejected { background: #fde8e8; color: #8b1a1a; }
-
-    .action-btns { display: flex; gap: 6px; }
-    .btn-accept, .btn-reject {
-      font-size: 12px;
-      font-weight: 600;
-      font-family: 'DM Sans', sans-serif;
-      padding: 5px 14px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .btn-accept { background: #2D7A4F; color: #fff; }
-    .btn-accept:hover { opacity: 0.85; }
-    .btn-reject { background: #fde8e8; color: #B83232; }
-    .btn-reject:hover { opacity: 0.85; }
-    .btn-accept:disabled, .btn-reject:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .drawer-empty {
-      text-align: center;
-      padding: 48px 24px;
-      color: #8A8178;
-      font-size: 14px;
-    }
-    .drawer-empty .icon { font-size: 36px; margin-bottom: 12px; }
-
-    .drawer-loading {
-      text-align: center;
-      padding: 48px 24px;
-      color: #8A8178;
-      font-size: 14px;
-    }
-
-    /* Make role cards show they're clickable */
-    .role-card {
-      cursor: pointer;
-      position: relative;
-    }
-    .role-card .applicant-count-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 12px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #460000;
-      background: #F5C842;
-      border: 1.5px dashed #460000;
-      padding: 4px 12px;
-      border-radius: 999px;
-    }
-
-    .portfolio-link-small {
-      font-size: 11px;
-      color: #460000;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .portfolio-link-small:hover { text-decoration: underline; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="explore-layout">
+<body class="page-layout">
 
   <header>
-    <div class="right">
-      <span class="logo">performr</span>
-      <a href="profile.html" class="logo-dot"></a>
-    </div>
+    <img src="assets/performr.png" alt="Performr logo" class="logo" />
+    <a href="profile.html"></a>
   </header>
 
-  <div class="tab-bar">
-    <a href="explore.html"   class="tab-explore">Explore</a>
-    <a href="applied.html"   class="tab-applied">Applied</a>
-    <a href="listings.html"  class="tab-listings">My Listings</a>
-  </div>
+  <nav>
+    <a href="explore.html">Explore</a>
+    <a href="applied.html">Applied</a>
+    <a href="listings.html">My Listings</a>
+  </nav>
 
-  <main class="page">
-    <div class="section-header">
+  <main>
+    <div class="page-header">
       <h1>My Listings</h1>
-      <button class="btn-create">Create a new role +</button>
+      <button class="create" id="btn-create">Create a new role +</button>
     </div>
-    <div class="roles-grid" id="roles-grid">
-      <p>Loading...</p>
-    </div>
+
+    <ul class="roles" id="roles-list">
+      <li>Loading…</li>
+    </ul>
   </main>
 
-  <!-- Applicants Drawer -->
-  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
-  <aside class="drawer" id="applicantsDrawer" role="dialog" aria-modal="true" aria-label="Applicants">
-    <div class="drawer-header">
-      <div class="drawer-header-top">
-        <div>
-          <div class="drawer-role-name" id="drawerRoleName">Role</div>
-          <div class="drawer-role-meta" id="drawerRoleMeta"></div>
-        </div>
-        <button class="drawer-close" onclick="closeDrawer()" aria-label="Close">✕</button>
+  <!-- Applicants drawer -->
+  <div id="drawerOverlay" onclick="closeDrawer()" style="
+    display:none; position:fixed; inset:0;
+    background:rgba(70,0,0,0.35); z-index:200;
+  "></div>
+
+  <aside id="applicantsDrawer" style="
+    display:none; position:fixed; top:0; right:0; bottom:0; width:420px;
+    background:#FFFEE0; border-left:2.5px dashed #460000;
+    z-index:201; flex-direction:column; overflow:hidden;
+  ">
+    <div style="padding:20px 24px 16px; border-bottom:2px dashed #460000; display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+      <div>
+        <h2 id="drawerRoleName" style="font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:4px;"></h2>
+        <p id="drawerRoleMeta" style="font-size:12px; color:#460000; opacity:0.7;"></p>
+        <p id="drawerCount" style="font-size:12px; font-weight:600; color:#460000; margin-top:4px;"></p>
       </div>
-      <div class="drawer-count" id="drawerCount"></div>
+      <button onclick="closeDrawer()" style="background:none; border:none; font-size:22px; cursor:pointer; color:#460000; flex-shrink:0;">×</button>
     </div>
-    <div class="drawer-body" id="drawerBody">
-      <div class="drawer-loading">Loading applicants…</div>
-    </div>
+    <div id="drawerBody" style="flex:1; overflow-y:auto; padding:16px 24px; display:flex; flex-direction:column; gap:12px;"></div>
   </aside>
+
+  <style>
+    #drawerOverlay.open  { display:block; }
+    #applicantsDrawer.open { display:flex; }
+
+    .applicant-card {
+      display:flex; gap:12px;
+      background:#FFF9D6; border:2px dashed #460000; border-radius:14px; padding:14px;
+    }
+    .applicant-avatar {
+      width:44px; height:44px; border-radius:50%;
+      background:#FF6558; border:2px dashed #460000;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:18px; color:#321F1F; flex-shrink:0; overflow:hidden;
+    }
+    .applicant-avatar img { width:100%; height:100%; object-fit:cover; }
+    .applicant-info { flex:1; min-width:0; }
+    .applicant-name { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:#321F1F; margin-bottom:2px; }
+    .applicant-sub  { font-size:12px; color:#460000; opacity:0.7; margin-bottom:4px; }
+    .applicant-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px; }
+    .applicant-bio  { font-size:12px; color:#321F1F; opacity:0.8; margin:4px 0; line-height:1.5; }
+    .portfolio-link-small { font-size:12px; color:#460000; font-weight:600; text-decoration:none; }
+    .portfolio-link-small:hover { text-decoration:underline; }
+    .status-row { display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap; }
+    .status-badge {
+      font-size:11px; font-weight:700; padding:3px 10px;
+      border-radius:999px; border:1.5px dashed #460000; text-transform:capitalize;
+    }
+    .status-badge.pending  { background:#FFE169; color:#321F1F; }
+    .status-badge.accepted { background:#D1FAE5; color:#2D7A4F; }
+    .status-badge.rejected { background:#FEE2E2; color:#B83232; }
+    .action-btns { display:flex; gap:6px; }
+    .btn-accept, .btn-reject {
+      padding:4px 12px; font-size:12px; font-weight:700; font-family:'Montserrat',sans-serif;
+      border-radius:999px; cursor:pointer; border:1.5px dashed #460000; transition:opacity 0.15s;
+    }
+    .btn-accept { background:#D1FAE5; color:#2D7A4F; }
+    .btn-reject { background:#FEE2E2; color:#B83232; }
+    .btn-accept:disabled, .btn-reject:disabled { opacity:0.4; cursor:default; }
+    .drawer-empty { text-align:center; padding:40px 0; color:#460000; opacity:0.6; font-size:14px; line-height:1.8; }
+    .drawer-empty .icon { font-size:32px; margin-bottom:8px; }
+    .applicant-count-badge {
+      margin-top:10px; font-size:12px; font-weight:600; color:#460000;
+    }
+  </style>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -290,26 +126,26 @@
       const token = await window.client.getTokenSilently();
       window.db.functions.setAuth(token);
 
-      document.querySelector('.btn-create').addEventListener('click', () => {
+      document.getElementById('btn-create').addEventListener('click', () => {
         window.location.href = 'addList.html';
       });
+
+      const list = document.getElementById('roles-list');
+      list.innerHTML = '';
 
       const { data, error } = await window.db
         .from('roles')
         .select('*')
         .eq('created_by', window.currentUser.sub);
 
-      const grid = document.getElementById('roles-grid');
-      grid.innerHTML = '';
-
       if (error) {
         console.error('Supabase error:', error.message, error.hint);
-        grid.innerHTML = '<p>Failed to load listings.</p>';
+        list.innerHTML = '<li>Failed to load listings.</li>';
         return;
       }
 
       if (!data || data.length === 0) {
-        grid.innerHTML = '<p>No listings yet. Create one above!</p>';
+        list.innerHTML = '<li>No listings yet. Create one above!</li>';
         return;
       }
 
@@ -327,23 +163,20 @@
 
       data.forEach(role => {
         const count = countMap[role.id] || 0;
-        const card = document.createElement('div');
-        card.className = 'role-card';
-        card.innerHTML = `
+        const li = document.createElement('li');
+        li.innerHTML = `
           <h2>${role.name ?? '—'}</h2>
-          <p class="card-address">${role.addr ? role.addr + ', ' : ''}${role.city ?? ''}</p>
-          <div class="card-tags">
-            ${role.genre    ? `<span class="tag-pill">${role.genre}</span>`    : ''}
-            ${role.level    ? `<span class="tag-pill">${role.level}</span>`    : ''}
-            ${role.location ? `<span class="tag-pill">${role.location}</span>` : ''}
-            ${role.uniform  ? `<span class="tag-pill">${role.uniform}</span>`  : ''}
-          </div>
-          <div class="applicant-count-badge">
-            👥 ${count} applicant${count !== 1 ? 's' : ''}
-          </div>
+          <p>${role.addr ? role.addr + ', ' : ''}${role.city ?? ''}</p>
+          <footer>
+            ${role.genre    ? `<span>${role.genre}</span>`    : ''}
+            ${role.level    ? `<span>${role.level}</span>`    : ''}
+            ${role.location ? `<span>${role.location}</span>` : ''}
+            ${role.uniform  ? `<span>${role.uniform}</span>`  : ''}
+          </footer>
+          <p class="status">👥 ${count} applicant${count !== 1 ? 's' : ''}</p>
         `;
-        card.addEventListener('click', () => openDrawer(role));
-        grid.appendChild(card);
+        li.addEventListener('click', () => openDrawer(role));
+        list.appendChild(li);
       });
     })();
 
@@ -353,7 +186,7 @@
       const meta = [role.genre, role.level, role.city].filter(Boolean).join(' · ');
       document.getElementById('drawerRoleMeta').textContent = meta;
       document.getElementById('drawerCount').textContent = '';
-      document.getElementById('drawerBody').innerHTML = '<div class="drawer-loading">Loading applicants…</div>';
+      document.getElementById('drawerBody').innerHTML = '<div class="drawer-empty">Loading applicants…</div>';
 
       document.getElementById('drawerOverlay').classList.add('open');
       document.getElementById('applicantsDrawer').classList.add('open');
@@ -368,18 +201,16 @@
       document.body.style.overflow = '';
     }
 
-    // Close on Escape key
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
     async function loadApplicants(roleId) {
-      // Fetch applications joined with profiles
       const { data, error } = await window.db
         .from('applications')
         .select('*, profiles(*)')
         .eq('role_id', roleId)
         .order('created_at', { ascending: false });
 
-      const body = document.getElementById('drawerBody');
+      const body    = document.getElementById('drawerBody');
       const countEl = document.getElementById('drawerCount');
 
       if (error) {
@@ -404,8 +235,8 @@
         const profile = app.profiles;
         const displayName = profile?.display_name || profile?.email || 'Unknown performer';
         const initial = displayName.charAt(0).toUpperCase();
-
         const statusClass = { pending: 'pending', accepted: 'accepted', rejected: 'rejected' }[app.status] ?? 'pending';
+        const isPending = app.status === 'pending';
 
         const card = document.createElement('div');
         card.className = 'applicant-card';
@@ -429,7 +260,6 @@
           ? `<a class="portfolio-link-small" href="${profile.portfolio_url}" target="_blank" rel="noopener">🔗 Portfolio</a>`
           : '';
 
-        const isPending = app.status === 'pending';
         card.innerHTML = `
           ${avatarHtml}
           <div class="applicant-info">
@@ -443,19 +273,14 @@
               <div class="action-btns">
                 <button class="btn-accept" id="accept-${app.id}"
                   onclick="updateStatus('${app.id}', 'accepted')"
-                  ${!isPending ? 'disabled' : ''}>
-                  ✓ Accept
-                </button>
+                  ${!isPending ? 'disabled' : ''}>✓ Accept</button>
                 <button class="btn-reject" id="reject-${app.id}"
                   onclick="updateStatus('${app.id}', 'rejected')"
-                  ${!isPending ? 'disabled' : ''}>
-                  ✕ Reject
-                </button>
+                  ${!isPending ? 'disabled' : ''}>✕ Reject</button>
               </div>
             </div>
           </div>
         `;
-
         body.appendChild(card);
       });
     }
@@ -482,9 +307,7 @@
 
       badge.textContent = newStatus;
       badge.className = `status-badge ${newStatus}`;
-      // Keep buttons disabled after a decision is made
     }
   </script>
-
 </body>
 </html>
