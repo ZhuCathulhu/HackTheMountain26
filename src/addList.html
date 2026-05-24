@@ -7,6 +7,211 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f7f7f5;
+      min-height: 100vh;
+    }
+
+    /* ── reuse your header/tab styles ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e8e8e4;
+      background: #fff;
+    }
+    .right { display: flex; align-items: center; gap: .4rem; }
+    .logo { font-size: 1.1rem; font-weight: 700; letter-spacing: -.02em; }
+    .logo-dot { width: 6px; height: 6px; border-radius: 50%; background: #000; }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid #e8e8e4;
+      background: #fff;
+    }
+    .tab-bar a {
+      padding: .75rem 1.25rem;
+      font-size: .875rem;
+      font-weight: 500;
+      color: #888;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-bar a:hover { color: #000; }
+    .tab-bar .tab-listings { color: #000; border-bottom-color: #000; }
+
+    /* ── page layout ── */
+    .add-page {
+      max-width: 600px;
+      margin: 2.5rem auto;
+      padding: 0 1.25rem 4rem;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      font-size: 1.1rem;
+      text-decoration: none;
+      color: #000;
+      transition: background .15s, border-color .15s;
+    }
+    .back-btn:hover { background: #f0f0f0; }
+
+    .page-heading h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -.03em;
+    }
+
+    /* ── form card ── */
+    .form-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e8e8e4;
+      overflow: hidden;
+    }
+
+    .form-section {
+      padding: 1.5rem;
+      border-bottom: 1px solid #f0f0ec;
+    }
+    .form-section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 1rem;
+    }
+
+    .field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      font-size: .8rem;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      padding: .65rem .85rem;
+      border: 1.5px solid #e4e4e0;
+      border-radius: 8px;
+      background: #fafafa;
+      color: #111;
+      outline: none;
+      transition: border-color .15s, background .15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #111;
+      background: #fff;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: #bbb; }
+
+    .field textarea { resize: vertical; min-height: 80px; }
+
+    /* custom select wrapper */
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: .85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #888;
+      font-size: .8rem;
+    }
+    .select-wrap select { width: 100%; padding-right: 2rem; cursor: pointer; }
+
+    /* two-column row */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+    /* tag pills for custom multi-select feel */
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+    .pill {
+      padding: .35rem .85rem;
+      border-radius: 999px;
+      border: 1.5px solid #e4e4e0;
+      font-size: .8rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: #fafafa;
+      color: #555;
+      transition: all .15s;
+      user-select: none;
+    }
+    .pill.selected {
+      background: #111;
+      border-color: #111;
+      color: #fff;
+    }
+
+    /* submit area */
+    .form-footer {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+
+    #errorMsg {
+      font-size: .85rem;
+      color: #c0392b;
+      display: none;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: .85rem;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -.01em;
+      transition: background .15s, opacity .15s;
+    }
+    .btn-submit:hover { background: #333; }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+  </style>
 </head>
 <body class="page-layout">
 
@@ -69,15 +274,33 @@
         </label>
       </section>
 
-      <section>
-        <p>Location</p>
-        <label>
-          Address
-          <input id="roleAddr" type="text" placeholder="123 Main St" />
-        </label>
-        <div class="row">
-          <label>
-            City
+      <!-- LOCATION -->
+      <div class="form-section">
+        <div class="section-label">Location</div>
+        <div class="field">
+  <label for="roleAddr">Address</label>
+  <div style="display:flex; gap:.5rem; align-items:flex-start;">
+    <input id="roleAddr" type="text" placeholder="123 Main St" style="flex:1;" />
+    <button type="button" id="geocodeBtn" style="
+      padding: .65rem .9rem;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+    " onmouseenter="this.style.background='#333'" onmouseleave="this.style.background='#111'">
+      📍 Geocode
+    </button>
+  </div>
+  <p id="geocodeStatus" style="font-size:.75rem; color:#888; margin-top:.3rem;"></p>
+</div>
+        <div class="field-row">
+          <div class="field">
+            <label for="roleCity">City</label>
             <input id="roleCity" type="text" placeholder="Montreal" />
           </label>
           <label>
@@ -118,18 +341,19 @@
           <span data-value="Formal">Formal</span>
           <span data-value="None">None</span>
         </div>
-        <label>
-          Or type a custom requirement
-          <input id="uniformOther" type="text" placeholder="e.g. All white, no shoes" />
-        </label>
-      </section>
+      </div>
 
-      <section>
-        <p class="error" id="errorMsg" hidden></p>
-        <button class="submit" type="button" id="submitBtn" onclick="submitRole()">Publish Role →</button>
-      </section>
-    </form>
-  </main>
+      <!-- SUBMIT -->
+      <div class="form-footer">
+        <p id="errorMsg"></p>
+        <button class="btn-submit" id="submitBtn" onclick="submitRole()">Publish Role →</button>
+      </div>
+
+    </div>
+  </div>
+  
+
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -172,13 +396,74 @@
       });
     });
 
-    async function submitRole() {
-      const errEl = document.getElementById('errorMsg');
-      const btn   = document.getElementById('submitBtn');
-      errEl.hidden = true;
+  document.getElementById('geocodeBtn').addEventListener('click', async () => {
+  const addr   = document.getElementById('roleAddr').value.trim();
+  const city   = document.getElementById('roleCity').value.trim();
+  const query  = [addr, city].filter(Boolean).join(', ');
+  const status = document.getElementById('geocodeStatus');
 
-      const name = document.getElementById('roleName').value.trim();
-      if (!name) { errEl.textContent = 'Role name is required.'; errEl.hidden = false; return; }
+  if (!query) {
+    status.textContent = 'Enter an address or city first.';
+    status.style.color = '#c00';
+    return;
+  }
+
+  status.textContent = 'Looking up coordinates…';
+  status.style.color = '#888';
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+    const res  = await fetch(url, {
+      headers: { 'Accept-Language': 'en' }
+    });
+    const data = await res.json();
+
+    if (!data.length) {
+      status.textContent = '⚠️ Address not found. Try adding a city or country.';
+      status.style.color = '#c00';
+      return;
+    }
+
+    document.getElementById('roleLat').value = parseFloat(data[0].lat).toFixed(6);
+    document.getElementById('roleLng').value = parseFloat(data[0].lon).toFixed(6);
+    status.textContent = `✓ Found: ${data[0].display_name}`;
+    status.style.color = '#2a7a2a';
+
+  } catch (e) {
+    status.textContent = '⚠️ Geocoding failed: ' + e.message;
+    status.style.color = '#c00';
+  }
+});
+
+  status.textContent = 'Looking up coordinates…';
+  status.style.color = '#888';
+
+  const geocoder = L.Control.Geocoder.nominatim();
+  geocoder.geocode(query, (results) => {
+    if (!results || results.length === 0) {
+      status.textContent = '⚠️ Address not found. Try adding a city or country.';
+      status.style.color = '#c00';
+      return;
+    }
+    const { lat, lng } = results[0].center;
+    document.getElementById('roleLat').value = lat.toFixed(6);
+    document.getElementById('roleLng').value = lng.toFixed(6);
+    status.textContent = `✓ Found: ${results[0].name}`;
+    status.style.color = '#2a7a2a';
+  });
+
+  // ── Submit ──
+  async function submitRole() {
+    const btn = document.getElementById('submitBtn');
+    const errEl = document.getElementById('errorMsg');
+    errEl.style.display = 'none';
+
+    const name = document.getElementById('roleName').value.trim();
+    if (!name) {
+      errEl.textContent = 'Role name is required.';
+      errEl.style.display = 'block';
+      return;
+    }
 
       const genreSelect = document.getElementById('roleGenre').value;
       const genre = genreSelect === 'Other'
@@ -222,19 +507,20 @@
           body: JSON.stringify(payload),
         });
 
-        if (res.ok) {
-          window.location.href = 'listings.html';
-        } else {
-          const err = await res.json();
-          throw new Error(err.message ?? JSON.stringify(err));
-        }
-      } catch (e) {
-        errEl.textContent = 'Error: ' + e.message;
-        errEl.hidden = false;
-        btn.disabled = false;
-        btn.textContent = 'Publish Role →';
+      if (res.ok) {
+        window.location.href = 'listings.html';
+      } else {
+        const err = await res.json();
+        throw new Error(err.message ?? JSON.stringify(err));
       }
+    } catch (e) {
+      errEl.textContent = 'Error: ' + e.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Publish Role →';
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>

@@ -175,6 +175,10 @@
     const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
 
+    // Pending delete state
+    let pendingDeleteId   = null;
+    let pendingDeleteCard = null;
+
     (async () => {
       const { createClient } = supabase;
       window.db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -248,6 +252,62 @@
       });
     })();
 
+    // ── Delete flow ──
+    function promptDelete(roleId, roleName, cardEl) {
+      pendingDeleteId   = roleId;
+      pendingDeleteCard = cardEl;
+      document.getElementById('confirmRoleName').textContent = roleName || 'this listing';
+      document.getElementById('confirmOverlay').classList.add('open');
+      document.getElementById('btnConfirmDelete').disabled = false;
+    }
+
+    function cancelDelete() {
+      pendingDeleteId   = null;
+      pendingDeleteCard = null;
+      document.getElementById('confirmOverlay').classList.remove('open');
+    }
+
+    async function confirmDelete() {
+      if (!pendingDeleteId) return;
+
+      const btn = document.getElementById('btnConfirmDelete');
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+
+      // Delete applications first (foreign key safety), then the role
+      await window.db.from('applications').delete().eq('role_id', pendingDeleteId);
+      const { error } = await window.db.from('roles').delete().eq('id', pendingDeleteId);
+
+      if (error) {
+        alert('Failed to delete: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+        return;
+      }
+
+      // Animate card out, then remove from DOM
+      if (pendingDeleteCard) {
+        pendingDeleteCard.classList.add('deleting');
+        setTimeout(() => {
+          pendingDeleteCard.remove();
+          // Show empty state if no cards left
+          const grid = document.getElementById('roles-grid');
+          if (!grid.querySelector('.role-card')) {
+            grid.innerHTML = '<p>No listings yet. Create one above!</p>';
+          }
+        }, 280);
+      }
+
+      document.getElementById('confirmOverlay').classList.remove('open');
+      pendingDeleteId   = null;
+      pendingDeleteCard = null;
+    }
+
+    // Close confirm dialog on overlay click
+    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+      if (e.target === this) cancelDelete();
+    });
+
     /* ── Drawer ──────────────────────────────────────────── */
 
     function openDrawer(role) {
@@ -273,6 +333,12 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
     /* ── Load & render applicants ────────────────────────── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeDrawer();
+        cancelDelete();
+      }
+    });
 
     async function loadApplicants(roleId) {
       const body    = document.getElementById('drawerBody');
@@ -378,6 +444,8 @@
 
       badge.textContent  = newStatus;
       badge.className    = `status-badge ${newStatus}`;
+      badge.textContent = newStatus;
+      badge.className = `status-badge ${newStatus}`;
     }
   </script>
 </body>
