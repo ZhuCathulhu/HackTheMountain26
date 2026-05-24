@@ -7,6 +7,124 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Drawer shell: sits at top of stacking context, covers full viewport ── */
+    #drawerShell {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+    }
+    #drawerShell.open { display: block; }
+
+    #drawerOverlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(70,0,0,0.4);
+      cursor: pointer;
+    }
+
+    #applicantsDrawer {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: min(440px, 100vw);
+      background: #FFFEE0;
+      border-left: 2.5px dashed #460000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #drawerHeader {
+      padding: 20px 24px 16px;
+      border-bottom: 2px dashed #460000;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      background: #FFF9D6;
+    }
+    #drawerRoleName {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+      color: #321F1F; margin-bottom: 4px;
+    }
+    #drawerRoleMeta { font-size: 12px; color: #460000; opacity: 0.7; }
+    #drawerCount    { font-size: 12px; font-weight: 600; color: #460000; margin-top: 4px; }
+
+    #drawerClose {
+      background: none; border: none;
+      font-size: 28px; line-height: 1;
+      cursor: pointer; color: #460000; flex-shrink: 0; padding: 0;
+    }
+    #drawerClose:hover { color: #FF6558; }
+
+    #drawerBody {
+      flex: 1; overflow-y: auto;
+      padding: 16px 20px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* ── Applicant cards ── */
+    .applicant-card {
+      display: flex; gap: 14px;
+      background: #FFF9D6;
+      border: 2px dashed #460000;
+      border-radius: 14px; padding: 14px;
+    }
+    .applicant-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: #FF6558; border: 2px dashed #460000;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 20px; color: #321F1F;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .applicant-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .applicant-info { flex: 1; min-width: 0; }
+    .applicant-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700; color: #321F1F; margin-bottom: 2px;
+    }
+    .applicant-sub  { font-size: 12px; color: #460000; opacity: 0.7; margin-bottom: 6px; }
+    .applicant-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+    .applicant-bio  {
+      font-size: 12px; color: #321F1F; opacity: 0.85;
+      margin: 4px 0 6px; line-height: 1.55;
+    }
+    .portfolio-link-small {
+      font-size: 12px; color: #460000; font-weight: 600; text-decoration: none;
+      display: inline-block; margin-bottom: 6px;
+    }
+    .portfolio-link-small:hover { text-decoration: underline; }
+
+    .status-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .status-badge {
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; border: 1.5px dashed #460000; text-transform: capitalize;
+    }
+    .status-badge.pending  { background: #FFE169; color: #321F1F; }
+    .status-badge.accepted { background: #D1FAE5; color: #2D7A4F; }
+    .status-badge.rejected { background: #FEE2E2; color: #B83232; }
+
+    .action-btns { display: flex; gap: 6px; }
+    .btn-accept, .btn-reject {
+      padding: 4px 14px; font-size: 12px; font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      border-radius: 999px; cursor: pointer;
+      border: 1.5px dashed #460000; transition: opacity 0.15s;
+    }
+    .btn-accept { background: #D1FAE5; color: #2D7A4F; }
+    .btn-reject { background: #FEE2E2; color: #B83232; }
+    .btn-accept:disabled, .btn-reject:disabled { opacity: 0.4; cursor: default; }
+
+    .drawer-empty {
+      text-align: center; padding: 48px 0;
+      color: #460000; opacity: 0.6; font-size: 14px; line-height: 1.8;
+    }
+    .drawer-empty .icon { font-size: 36px; margin-bottom: 10px; }
+  </style>
 </head>
 <body class="page-layout">
 
@@ -26,78 +144,30 @@
       <h1>My Listings</h1>
       <button class="create" id="btn-create">Create a new role +</button>
     </div>
-
     <ul class="roles" id="roles-list">
       <li>Loading…</li>
     </ul>
   </main>
 
-  <!-- Applicants drawer -->
-  <div id="drawerOverlay" onclick="closeDrawer()" style="
-    display:none; position:fixed; inset:0;
-    background:rgba(70,0,0,0.35); z-index:200;
-  "></div>
-
-  <aside id="applicantsDrawer" style="
-    display:none; position:fixed; top:0; right:0; bottom:0; width:420px;
-    background:#FFFEE0; border-left:2.5px dashed #460000;
-    z-index:201; flex-direction:column; overflow:hidden;
-  ">
-    <div style="padding:20px 24px 16px; border-bottom:2px dashed #460000; display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
-      <div>
-        <h2 id="drawerRoleName" style="font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:4px;"></h2>
-        <p id="drawerRoleMeta" style="font-size:12px; color:#460000; opacity:0.7;"></p>
-        <p id="drawerCount" style="font-size:12px; font-weight:600; color:#460000; margin-top:4px;"></p>
+  <!--
+    Drawer shell — placed as a direct child of <body>, outside <main>,
+    so it is never clipped by body.page-layout's overflow-y:auto.
+    display:none lives in CSS (not inline) so the .open class can override it.
+  -->
+  <div id="drawerShell">
+    <div id="drawerOverlay" onclick="closeDrawer()"></div>
+    <aside id="applicantsDrawer">
+      <div id="drawerHeader">
+        <div>
+          <h2 id="drawerRoleName"></h2>
+          <p id="drawerRoleMeta"></p>
+          <p id="drawerCount"></p>
+        </div>
+        <button id="drawerClose" onclick="closeDrawer()" aria-label="Close">×</button>
       </div>
-      <button onclick="closeDrawer()" style="background:none; border:none; font-size:22px; cursor:pointer; color:#460000; flex-shrink:0;">×</button>
-    </div>
-    <div id="drawerBody" style="flex:1; overflow-y:auto; padding:16px 24px; display:flex; flex-direction:column; gap:12px;"></div>
-  </aside>
-
-  <style>
-    #drawerOverlay.open  { display:block; }
-    #applicantsDrawer.open { display:flex; }
-
-    .applicant-card {
-      display:flex; gap:12px;
-      background:#FFF9D6; border:2px dashed #460000; border-radius:14px; padding:14px;
-    }
-    .applicant-avatar {
-      width:44px; height:44px; border-radius:50%;
-      background:#FF6558; border:2px dashed #460000;
-      display:flex; align-items:center; justify-content:center;
-      font-weight:700; font-size:18px; color:#321F1F; flex-shrink:0; overflow:hidden;
-    }
-    .applicant-avatar img { width:100%; height:100%; object-fit:cover; }
-    .applicant-info { flex:1; min-width:0; }
-    .applicant-name { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:#321F1F; margin-bottom:2px; }
-    .applicant-sub  { font-size:12px; color:#460000; opacity:0.7; margin-bottom:4px; }
-    .applicant-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px; }
-    .applicant-bio  { font-size:12px; color:#321F1F; opacity:0.8; margin:4px 0; line-height:1.5; }
-    .portfolio-link-small { font-size:12px; color:#460000; font-weight:600; text-decoration:none; }
-    .portfolio-link-small:hover { text-decoration:underline; }
-    .status-row { display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap; }
-    .status-badge {
-      font-size:11px; font-weight:700; padding:3px 10px;
-      border-radius:999px; border:1.5px dashed #460000; text-transform:capitalize;
-    }
-    .status-badge.pending  { background:#FFE169; color:#321F1F; }
-    .status-badge.accepted { background:#D1FAE5; color:#2D7A4F; }
-    .status-badge.rejected { background:#FEE2E2; color:#B83232; }
-    .action-btns { display:flex; gap:6px; }
-    .btn-accept, .btn-reject {
-      padding:4px 12px; font-size:12px; font-weight:700; font-family:'Montserrat',sans-serif;
-      border-radius:999px; cursor:pointer; border:1.5px dashed #460000; transition:opacity 0.15s;
-    }
-    .btn-accept { background:#D1FAE5; color:#2D7A4F; }
-    .btn-reject { background:#FEE2E2; color:#B83232; }
-    .btn-accept:disabled, .btn-reject:disabled { opacity:0.4; cursor:default; }
-    .drawer-empty { text-align:center; padding:40px 0; color:#460000; opacity:0.6; font-size:14px; line-height:1.8; }
-    .drawer-empty .icon { font-size:32px; margin-bottom:8px; }
-    .applicant-count-badge {
-      margin-top:10px; font-size:12px; font-weight:600; color:#460000;
-    }
-  </style>
+      <div id="drawerBody"></div>
+    </aside>
+  </div>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -108,6 +178,7 @@
     (async () => {
       const { createClient } = supabase;
       window.db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
       window.client = await auth0.createAuth0Client({
         domain: 'dev-wdfb7tfjkndmtcl5.us.auth0.com',
         clientId: 'Ix662hc4PCymFOpQeFK4OvMKWzAjF3Cn',
@@ -121,8 +192,7 @@
         return;
       }
 
-      const user = await window.client.getUser();
-      window.currentUser = user;
+      window.currentUser = await window.client.getUser();
       const token = await window.client.getTokenSilently();
       window.db.functions.setAuth(token);
 
@@ -139,17 +209,15 @@
         .eq('created_by', window.currentUser.sub);
 
       if (error) {
-        console.error('Supabase error:', error.message, error.hint);
         list.innerHTML = '<li>Failed to load listings.</li>';
         return;
       }
-
       if (!data || data.length === 0) {
         list.innerHTML = '<li>No listings yet. Create one above!</li>';
         return;
       }
 
-      // Fetch application counts for all roles in one query
+      // Fetch applicant counts for all roles in one go
       const roleIds = data.map(r => r.id);
       const { data: countData } = await window.db
         .from('applications')
@@ -173,45 +241,48 @@
             ${role.location ? `<span>${role.location}</span>` : ''}
             ${role.uniform  ? `<span>${role.uniform}</span>`  : ''}
           </footer>
-          <p class="status">👥 ${count} applicant${count !== 1 ? 's' : ''}</p>
+          <p class="status">👥 ${count} applicant${count !== 1 ? 's' : ''} — click to review</p>
         `;
         li.addEventListener('click', () => openDrawer(role));
         list.appendChild(li);
       });
     })();
 
-    // ── Drawer logic ──
+    /* ── Drawer ──────────────────────────────────────────── */
+
     function openDrawer(role) {
       document.getElementById('drawerRoleName').textContent = role.name ?? '—';
-      const meta = [role.genre, role.level, role.city].filter(Boolean).join(' · ');
-      document.getElementById('drawerRoleMeta').textContent = meta;
+      document.getElementById('drawerRoleMeta').textContent =
+        [role.genre, role.level, role.city].filter(Boolean).join(' · ');
       document.getElementById('drawerCount').textContent = '';
-      document.getElementById('drawerBody').innerHTML = '<div class="drawer-empty">Loading applicants…</div>';
+      document.getElementById('drawerBody').innerHTML =
+        '<div class="drawer-empty"><div class="icon">⏳</div>Loading applicants…</div>';
 
-      document.getElementById('drawerOverlay').classList.add('open');
-      document.getElementById('applicantsDrawer').classList.add('open');
-      document.body.style.overflow = 'hidden';
+      document.getElementById('drawerShell').classList.add('open');
+      // Lock page scroll while drawer is open
+      document.documentElement.style.overflow = 'hidden';
 
       loadApplicants(role.id);
     }
 
     function closeDrawer() {
-      document.getElementById('drawerOverlay').classList.remove('open');
-      document.getElementById('applicantsDrawer').classList.remove('open');
-      document.body.style.overflow = '';
+      document.getElementById('drawerShell').classList.remove('open');
+      document.documentElement.style.overflow = '';
     }
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
+    /* ── Load & render applicants ────────────────────────── */
+
     async function loadApplicants(roleId) {
+      const body    = document.getElementById('drawerBody');
+      const countEl = document.getElementById('drawerCount');
+
       const { data, error } = await window.db
         .from('applications')
         .select('*, profiles(*)')
         .eq('role_id', roleId)
         .order('created_at', { ascending: false });
-
-      const body    = document.getElementById('drawerBody');
-      const countEl = document.getElementById('drawerCount');
 
       if (error) {
         body.innerHTML = `<div class="drawer-empty"><div class="icon">⚠️</div>Failed to load applicants.</div>`;
@@ -232,50 +303,48 @@
       body.innerHTML = '';
 
       data.forEach(app => {
-        const profile = app.profiles;
-        const displayName = profile?.display_name || profile?.email || 'Unknown performer';
-        const initial = displayName.charAt(0).toUpperCase();
-        const statusClass = { pending: 'pending', accepted: 'accepted', rejected: 'rejected' }[app.status] ?? 'pending';
-        const isPending = app.status === 'pending';
+        const p = app.profiles;
+        const displayName = p?.display_name || p?.email || 'Unknown performer';
+        const initial     = displayName.charAt(0).toUpperCase();
+        const statusClass = ['pending','accepted','rejected'].includes(app.status) ? app.status : 'pending';
+        const isPending   = app.status === 'pending';
 
-        const card = document.createElement('div');
-        card.className = 'applicant-card';
-        card.dataset.appId = app.id;
-
-        const avatarHtml = profile?.avatar_url
-          ? `<div class="applicant-avatar"><img src="${profile.avatar_url}" alt="${displayName}" /></div>`
+        const avatarHtml = p?.avatar_url
+          ? `<div class="applicant-avatar"><img src="${p.avatar_url}" alt="${displayName}"></div>`
           : `<div class="applicant-avatar">${initial}</div>`;
 
         const subParts = [];
-        if (profile?.discipline_detail) subParts.push(profile.discipline_detail);
-        else if (profile?.discipline) subParts.push(profile.discipline);
-        if (profile?.location) subParts.push('📍 ' + profile.location);
+        if (p?.discipline_detail) subParts.push(p.discipline_detail);
+        else if (p?.discipline)   subParts.push(p.discipline);
+        if (p?.location)          subParts.push('📍 ' + p.location);
 
-        const tagsHtml = [profile?.role, profile?.org_user]
+        const tagsHtml = [p?.role, p?.org_user]
           .filter(Boolean)
           .map(t => `<span class="tag-pill" style="font-size:11px;">${t}</span>`)
           .join('');
 
-        const portfolioHtml = profile?.portfolio_url
-          ? `<a class="portfolio-link-small" href="${profile.portfolio_url}" target="_blank" rel="noopener">🔗 Portfolio</a>`
+        const portfolioHtml = p?.portfolio_url
+          ? `<a class="portfolio-link-small" href="${p.portfolio_url}" target="_blank" rel="noopener">🔗 Portfolio</a>`
           : '';
 
+        const card = document.createElement('div');
+        card.className = 'applicant-card';
         card.innerHTML = `
           ${avatarHtml}
           <div class="applicant-info">
             <div class="applicant-name">${displayName}</div>
-            <div class="applicant-sub">${subParts.join(' · ')}</div>
-            ${tagsHtml ? `<div class="applicant-tags">${tagsHtml}</div>` : ''}
-            ${profile?.bio ? `<div class="applicant-bio">${profile.bio}</div>` : ''}
+            ${subParts.length ? `<div class="applicant-sub">${subParts.join(' · ')}</div>` : ''}
+            ${tagsHtml        ? `<div class="applicant-tags">${tagsHtml}</div>`            : ''}
+            ${p?.bio          ? `<div class="applicant-bio">${p.bio}</div>`                 : ''}
             ${portfolioHtml}
             <div class="status-row">
               <span class="status-badge ${statusClass}" id="badge-${app.id}">${app.status}</span>
               <div class="action-btns">
                 <button class="btn-accept" id="accept-${app.id}"
-                  onclick="updateStatus('${app.id}', 'accepted')"
+                  onclick="updateStatus('${app.id}','accepted')"
                   ${!isPending ? 'disabled' : ''}>✓ Accept</button>
                 <button class="btn-reject" id="reject-${app.id}"
-                  onclick="updateStatus('${app.id}', 'rejected')"
+                  onclick="updateStatus('${app.id}','rejected')"
                   ${!isPending ? 'disabled' : ''}>✕ Reject</button>
               </div>
             </div>
@@ -284,6 +353,8 @@
         body.appendChild(card);
       });
     }
+
+    /* ── Accept / reject ─────────────────────────────────── */
 
     async function updateStatus(appId, newStatus) {
       const acceptBtn = document.getElementById(`accept-${appId}`);
@@ -305,8 +376,8 @@
         return;
       }
 
-      badge.textContent = newStatus;
-      badge.className = `status-badge ${newStatus}`;
+      badge.textContent  = newStatus;
+      badge.className    = `status-badge ${newStatus}`;
     }
   </script>
 </body>
