@@ -196,7 +196,15 @@
     .role-card {
       cursor: pointer;
       position: relative;
+      transition: opacity 0.25s, transform 0.25s;
     }
+    /* Fade-out animation when deleting */
+    .role-card.deleting {
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+    }
+
     .role-card .applicant-count-badge {
       display: inline-flex;
       align-items: center;
@@ -211,6 +219,39 @@
       border-radius: 999px;
     }
 
+    /* ── Delete button ── */
+    .btn-delete-role {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid #e8e4de;
+      background: #fff;
+      color: #B83232;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+      z-index: 10;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .role-card:hover .btn-delete-role { opacity: 1; }
+    .btn-delete-role:hover {
+      background: #fde8e8;
+      border-color: #B83232;
+    }
+    /* Always visible on touch devices */
+    @media (hover: none) {
+      .btn-delete-role { opacity: 1; }
+    }
+
     .portfolio-link-small {
       font-size: 11px;
       color: #460000;
@@ -218,6 +259,71 @@
       font-weight: 600;
     }
     .portfolio-link-small:hover { text-decoration: underline; }
+
+    /* ── Confirm delete dialog ── */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 3000;
+      backdrop-filter: blur(3px);
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-dialog {
+      background: #FAFAE8;
+      border: 2px solid #460000;
+      border-radius: 16px;
+      padding: 28px 28px 22px;
+      max-width: 360px;
+      width: calc(100vw - 40px);
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(50,3,3,0.18);
+    }
+    .confirm-dialog .confirm-icon { font-size: 32px; margin-bottom: 12px; }
+    .confirm-dialog h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1A0A0A;
+      margin-bottom: 8px;
+    }
+    .confirm-dialog p {
+      font-size: 13.5px;
+      color: #5a4a44;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .confirm-dialog p strong { color: #320303; }
+    .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+    .btn-confirm-cancel {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 999px;
+      border: 1.5px solid #c8c0b8;
+      background: transparent;
+      color: #5a4a44;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-confirm-cancel:hover { background: #f0ece8; }
+    .btn-confirm-delete {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: 999px;
+      border: none;
+      background: #B83232;
+      color: #fff;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-confirm-delete:hover { opacity: 0.85; }
+    .btn-confirm-delete:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body class="explore-layout">
@@ -263,11 +369,28 @@
     </div>
   </aside>
 
+  <!-- Confirm Delete Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-dialog">
+      <div class="confirm-icon">🗑️</div>
+      <h3>Delete this listing?</h3>
+      <p>This will permanently remove <strong id="confirmRoleName"></strong> and all its applications. This can't be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-confirm-cancel" onclick="cancelDelete()">Cancel</button>
+        <button class="btn-confirm-delete" id="btnConfirmDelete" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL      = 'https://golijzcjitljymhpjaur.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbGlqemNqaXRsanltaHBqYXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDYxMDQsImV4cCI6MjA5NTEyMjEwNH0.fRLEv-8VrrrdnN6Ds9iux4PuDfHcLS3x2ezodp4w_Bk';
+
+    // Pending delete state
+    let pendingDeleteId   = null;
+    let pendingDeleteCard = null;
 
     (async () => {
       const { createClient } = supabase;
@@ -329,7 +452,14 @@
         const count = countMap[role.id] || 0;
         const card = document.createElement('div');
         card.className = 'role-card';
+        card.dataset.roleId = role.id;
         card.innerHTML = `
+          <button
+            class="btn-delete-role"
+            aria-label="Delete listing"
+            title="Delete listing"
+            onclick="event.stopPropagation(); promptDelete('${role.id}', '${(role.name ?? '').replace(/'/g, "\\'")}', this.closest('.role-card'))"
+          >✕</button>
           <h2>${role.name ?? '—'}</h2>
           <p class="card-address">${role.addr ? role.addr + ', ' : ''}${role.city ?? ''}</p>
           <div class="card-tags">
@@ -346,6 +476,62 @@
         grid.appendChild(card);
       });
     })();
+
+    // ── Delete flow ──
+    function promptDelete(roleId, roleName, cardEl) {
+      pendingDeleteId   = roleId;
+      pendingDeleteCard = cardEl;
+      document.getElementById('confirmRoleName').textContent = roleName || 'this listing';
+      document.getElementById('confirmOverlay').classList.add('open');
+      document.getElementById('btnConfirmDelete').disabled = false;
+    }
+
+    function cancelDelete() {
+      pendingDeleteId   = null;
+      pendingDeleteCard = null;
+      document.getElementById('confirmOverlay').classList.remove('open');
+    }
+
+    async function confirmDelete() {
+      if (!pendingDeleteId) return;
+
+      const btn = document.getElementById('btnConfirmDelete');
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+
+      // Delete applications first (foreign key safety), then the role
+      await window.db.from('applications').delete().eq('role_id', pendingDeleteId);
+      const { error } = await window.db.from('roles').delete().eq('id', pendingDeleteId);
+
+      if (error) {
+        alert('Failed to delete: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+        return;
+      }
+
+      // Animate card out, then remove from DOM
+      if (pendingDeleteCard) {
+        pendingDeleteCard.classList.add('deleting');
+        setTimeout(() => {
+          pendingDeleteCard.remove();
+          // Show empty state if no cards left
+          const grid = document.getElementById('roles-grid');
+          if (!grid.querySelector('.role-card')) {
+            grid.innerHTML = '<p>No listings yet. Create one above!</p>';
+          }
+        }, 280);
+      }
+
+      document.getElementById('confirmOverlay').classList.remove('open');
+      pendingDeleteId   = null;
+      pendingDeleteCard = null;
+    }
+
+    // Close confirm dialog on overlay click
+    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+      if (e.target === this) cancelDelete();
+    });
 
     // ── Drawer logic ──
     function openDrawer(role) {
@@ -368,11 +554,14 @@
       document.body.style.overflow = '';
     }
 
-    // Close on Escape key
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeDrawer();
+        cancelDelete();
+      }
+    });
 
     async function loadApplicants(roleId) {
-      // Fetch applications joined with profiles
       const { data, error } = await window.db
         .from('applications')
         .select('*, profiles(*)')
@@ -482,7 +671,6 @@
 
       badge.textContent = newStatus;
       badge.className = `status-badge ${newStatus}`;
-      // Keep buttons disabled after a decision is made
     }
   </script>
 
